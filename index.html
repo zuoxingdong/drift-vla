@@ -989,6 +989,36 @@
       font-size: 0.88rem;
     }
     .section.tight { padding-top: 2rem; padding-bottom: 2rem; }
+
+    .citation-box {
+      max-width: 52rem;
+      margin: 0 auto;
+      position: relative;
+    }
+    .citation-box pre {
+      background: #faf9f6;
+      border: 1px solid var(--hairline);
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      color: var(--ink-2);
+      font-size: 0.88rem;
+      line-height: 1.55;
+      overflow-x: auto;
+      text-align: left;
+    }
+    .citation-copy {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink-muted);
+      font-size: 0.8rem;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+    }
+    .citation-copy:hover { color: var(--ink); }
   </style>
 </head>
 <body>
@@ -1047,6 +1077,11 @@
                 <span class="link-block">
                   <a href="#ablation" class="button is-normal is-rounded">
                     <span class="icon"><i class="fas fa-table"></i></span><span>Ablation</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="#BibTeX" class="button is-normal is-rounded">
+                    <span class="icon"><i class="fas fa-quote-right"></i></span><span>BibTeX</span>
                   </a>
                 </span>
               </div>
@@ -1727,7 +1762,32 @@
     </div>
   </section>
 
-  <!-- ==================== S8 · FOOTER ==================== -->
+  <!-- ==================== S8 · CITATION ==================== -->
+  <section class="section tight" id="BibTeX">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Citation</h2>
+      <div class="citation-box">
+        <button class="citation-copy" onclick="copyBibtex(this)" aria-label="Copy BibTeX">copy</button>
+        <pre><code id="bibtex-entry">@misc{zuo2026driftvla,
+  title  = {Drift-VLA: Fast Vision-Language-Action Policies with One-Step Drifting},
+  author = {Zuo, Xingdong},
+  year   = {2026},
+  url    = {https://zuoxingdong.github.io/drift-vla/}
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    function copyBibtex(btn) {
+      navigator.clipboard.writeText(document.getElementById("bibtex-entry").textContent).then(function () {
+        btn.textContent = "copied";
+        setTimeout(function () { btn.textContent = "copy"; }, 1500);
+      });
+    }
+  </script>
+
+  <!-- ==================== S9 · FOOTER ==================== -->
   <footer class="footer">
     <div class="container">
       <div class="columns is-centered">
