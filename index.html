@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="Drift-VLA: Fast Vision-Language-Action Policies with One-Step Drifting">
+  <meta name="description" content="Action-dimension Drift-VLA reaches 90.2% at 1 NFE; with KeyStone self-consistency, the best observed LIBERO-Spatial result is 92.3 ±0.6% at 53.5 ms/chunk.">
+  <meta name="keywords" content="vision-language-action, VLA, SmolVLA, flow matching, drifting, one-step generation, robot learning, LIBERO, edge robotics">
+  <meta name="author" content="Xingdong Zuo">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Drift-VLA: Fast Vision-Language-Action Policies with One-Step Drifting">
+  <meta property="og:description" content="Action-dimension Drift-VLA reaches 90.2% at 1 NFE; with KeyStone self-consistency, the best observed LIBERO-Spatial result is 92.3 ±0.6% at 53.5 ms/chunk.">
+  <meta property="og:url" content="https://zuoxingdong.github.io/drift-vla/">
+  <meta property="og:image" content="https://zuoxingdong.github.io/drift-vla/static/images/og_preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Drift-VLA: Fast Vision-Language-Action Policies with One-Step Drifting">
+  <meta name="twitter:description" content="Action-dimension Drift-VLA reaches 90.2% at 1 NFE; with KeyStone self-consistency, the best observed LIBERO-Spatial result is 92.3 ±0.6% at 53.5 ms/chunk.">
+  <meta name="twitter:image" content="https://zuoxingdong.github.io/drift-vla/static/images/og_preview.png">
+
+  <title>Drift-VLA: Fast Vision-Language-Action Policies with One-Step Drifting</title>
+
+  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="static/images/favicon.svg">
+
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="static/js/index.js"></script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+    /* ---- Drift-VLA page styles (accent + figure/table chrome) ------------ */
+    :root {
+      --drift-blue: #2a78d6;   /* Drift-VLA (ours) — fixed, never reassigned */
+      --fm-aqua:    #1baf7a;   /* SmolVLA-FM      — fixed, never reassigned */
+      --drift-text: #1a5fb4;   /* darkened variants: AA-contrast for colored prose */
+      --fm-text:    #0c7a55;
+      --ink:        #0b0b0b;
+      --ink-2:      #52514e;
+      --ink-muted:  #898781;
+      --hairline:   #e1e0d9;
+    }
+    body { color: var(--ink); }
+    .publication-title { letter-spacing: -0.01em; }
+    .hero-subtitle {
+      color: var(--ink-2);
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.45;
+      max-width: 48rem;
+      margin: 1rem auto 0;
+    }
+    .hero-link-panel {
+      margin-top: 1rem;
+    }
+    .hero-resource-links,
+    .hero-nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .hero-resource-links .button {
+      min-width: 7.5rem;
+    }
+    .hero-nav-links {
+      margin-top: 0.65rem;
+    }
+    .hero-nav-links .button {
+      border-color: rgba(36,44,55,0.14);
+      background: #ffffff;
+      color: var(--ink-2);
+      font-size: 0.9rem;
+      font-weight: 700;
+      box-shadow: none;
+    }
+    .hero-nav-links .button:hover {
+      border-color: rgba(42,120,214,0.28);
+      color: var(--drift-text);
+      transform: translateY(-1px);
+    }
+
+    .figure-block { margin: 0 auto; text-align: center; }
+    .figure-block img, .figure-block video { max-width: 100%; height: auto; }
+    .figure-caption {
+      color: var(--ink-2); font-size: 0.92rem; max-width: 46rem;
+      margin: 0.6rem auto 0; text-align: center;
+    }
+    .section-lead {
+      color: var(--ink-2);
+      font-size: 1.02rem;
+      line-height: 1.55;
+      max-width: 46rem;
+      margin: 0 auto 1rem;
+      text-align: center;
+    }
+    .section-lead strong { color: var(--ink); }
+
+    /* method chip: colored mark beside text — text itself never wears the hue */
+    .chip { display: inline-flex; align-items: center; gap: 0.35em; white-space: nowrap; }
+    .chip::before {
+      content: ""; width: 0.7em; height: 0.7em; border-radius: 50%;
+      display: inline-block; background: var(--ink-muted); flex: none;
+    }
+    .chip.drift::before { background: var(--drift-blue); }
+    .chip.fm::before    { background: var(--fm-aqua); }
+
+    /* TL;DR — centered, softly shaded card with colorful keyword bolding */
+    .tldr-card {
+      background: linear-gradient(135deg, rgba(42,120,214,0.08), rgba(27,175,122,0.08));
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      padding: 2.2rem 2.6rem;
+      max-width: 50rem;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .tldr-card p { font-size: 1.13rem; line-height: 1.65; margin-bottom: 0.9rem; }
+    .tldr-card p:last-child { margin-bottom: 0; }
+    .w-drift { color: var(--drift-text); font-weight: 700; }
+    .w-fm    { color: var(--fm-text);    font-weight: 700; }
+    .w-key   { color: var(--drift-text); font-weight: 800; }
+    .w-speed { color: var(--fm-text);    font-weight: 800; }
+
+    /* background primer cards */
+    .primer-card {
+      border: 1px solid var(--hairline); border-radius: 8px;
+      padding: 1.4rem 1.6rem; height: 100%;
+    }
+    .primer-card.fm    { background: rgba(27,175,122,0.05); }
+    .primer-card.drift { background: rgba(42,120,214,0.05); }
+    .primer-card h3 { font-size: 1.1rem; margin-bottom: 0.6rem; }
+    .primer-card p { font-size: 0.98rem; color: var(--ink-2); margin-bottom: 0.5rem; }
+
+    .explainer-panel {
+      margin: 0;
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .explainer-panel img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #f7f9fc;
+    }
+    .explainer-caption {
+      padding: 0.8rem 0.95rem 0.9rem;
+      color: var(--ink-2);
+      font-size: 0.92rem;
+      line-height: 1.42;
+    }
+    .explainer-caption strong {
+      color: var(--ink);
+      display: block;
+      margin-bottom: 0.18rem;
+    }
+    .top-animation-panel {
+      max-width: 58rem;
+      margin: 0 auto;
+      border-color: rgba(42,120,214,0.28);
+      box-shadow: 0 18px 42px rgba(42,120,214,0.10);
+    }
+    .top-animation-caption {
+      text-align: center;
+      font-size: 0.98rem;
+    }
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.75rem;
+      max-width: 58rem;
+      margin: 1rem auto 0;
+    }
+    .hero-metric {
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 0.85rem 0.9rem;
+      text-align: center;
+    }
+    .hero-metric strong {
+      display: block;
+      color: var(--ink);
+      font-size: 1.35rem;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+    .hero-metric span {
+      display: block;
+      color: var(--ink-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-top: 0.28rem;
+      text-transform: uppercase;
+    }
+    .realworld-teaser {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(16rem, 0.82fr);
+      gap: 1.1rem;
+      align-items: center;
+      max-width: 58rem;
+      margin: 1.25rem auto 0;
+      padding: 0.85rem;
+      border: 1px solid rgba(42,120,214,0.26);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(42,120,214,0.08), rgba(27,175,122,0.07)),
+        #ffffff;
+      box-shadow: 0 18px 44px rgba(36,44,55,0.08);
+    }
+    .realworld-teaser-media {
+      margin: 0;
+      border: 1px solid rgba(36,44,55,0.12);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f7f7f4;
+    }
+    .realworld-teaser-media video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 11;
+      object-fit: contain;
+      background: #f7f7f4;
+    }
+    .realworld-teaser-copy {
+      padding: 0.25rem 0.25rem 0.25rem 0;
+      text-align: left;
+    }
+    .realworld-kicker {
+      color: var(--drift-text);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+    .realworld-teaser-title {
+      color: var(--ink);
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.22;
+      margin: 0.3rem 0 0.55rem;
+    }
+    .realworld-teaser-copy p {
+      color: var(--ink-2);
+      font-size: 0.98rem;
+      line-height: 1.45;
+      margin: 0;
+    }
+    .realworld-teaser-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin: 0.85rem 0 0.95rem;
+    }
+    .realworld-pill {
+      border: 1px solid rgba(42,120,214,0.22);
+      border-radius: 999px;
+      background: rgba(42,120,214,0.08);
+      color: var(--drift-text);
+      font-size: 0.76rem;
+      font-weight: 800;
+      line-height: 1.2;
+      padding: 0.32rem 0.58rem;
+      white-space: nowrap;
+    }
+    .realworld-teaser-link {
+      color: var(--ink);
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 0.18em;
+    }
+    .realworld-teaser .realworld-scorecard {
+      grid-column: 1 / -1;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding: 0.9rem;
+      border-color: rgba(42,120,214,0.24);
+      background: rgba(255,255,255,0.76);
+    }
+    .realworld-teaser .realworld-scorecard-head {
+      margin-bottom: 0.65rem;
+    }
+    .training-visual-shell {
+      width: min(1000px, calc(100vw - 2rem));
+      margin: 1.45rem auto 0;
+    }
+    .training-visual-shell .training-title {
+      margin-bottom: 0.8rem;
+      text-align: center;
+    }
+    .training-panel-stack {
+      display: grid;
+      gap: 1rem;
+    }
+    .training-panel {
+      box-shadow: 0 14px 34px rgba(36,44,55,0.08);
+    }
+    .training-panel.fm {
+      border-color: rgba(27,175,122,0.32);
+    }
+    .training-panel.drift {
+      border-color: rgba(42,120,214,0.32);
+    }
+    .training-panel .explainer-caption {
+      text-align: center;
+      font-size: 0.96rem;
+    }
+    .method-visual-shell {
+      width: min(1000px, calc(100% - 2rem));
+      margin: 1.35rem auto 0;
+    }
+    .method-pipeline-panel {
+      border-color: rgba(42,120,214,0.30);
+      box-shadow: 0 14px 34px rgba(36,44,55,0.08);
+    }
+    .method-pipeline-panel .explainer-caption {
+      text-align: center;
+      font-size: 0.96rem;
+    }
+    .formula-showcase {
+      width: min(1040px, calc(100vw - 2rem));
+      margin: 1.35rem auto 1.45rem;
+    }
+    .equation-panel {
+      position: relative;
+      border: 1px solid rgba(36,44,55,0.10);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.96), rgba(249,251,254,0.96)),
+        linear-gradient(135deg, rgba(42,120,214,0.08), rgba(27,175,122,0.08));
+      color: var(--ink-2);
+      box-shadow: 0 18px 42px rgba(36,44,55,0.08);
+      overflow: hidden;
+    }
+    .equation-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 4px;
+      background: linear-gradient(90deg, var(--fm-aqua), var(--drift-blue));
+    }
+    .equation-panel.compact {
+      margin-top: 0.95rem;
+      margin-bottom: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,252,250,0.98)),
+        linear-gradient(135deg, rgba(42,120,214,0.08), rgba(27,175,122,0.10));
+    }
+    .equation-panel.compact::before {
+      background: linear-gradient(90deg, var(--drift-blue), var(--fm-aqua));
+    }
+    .equation-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.05rem 1.15rem 0.85rem;
+      border-bottom: 1px solid rgba(36,44,55,0.08);
+    }
+    .equation-kicker {
+      color: var(--ink-muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+    .equation-title {
+      color: var(--ink);
+      font-size: 1.03rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-top: 0.18rem;
+    }
+    .equation-pill {
+      align-self: center;
+      border: 1px solid rgba(42,120,214,0.22);
+      border-radius: 999px;
+      background: rgba(42,120,214,0.07);
+      color: var(--drift-text);
+      flex: none;
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.2;
+      padding: 0.32rem 0.62rem;
+      white-space: nowrap;
+    }
+    .equation-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .equation-cell {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 12.4rem;
+      border: 1px solid rgba(36,44,55,0.09);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(36,44,55,0.05);
+      overflow: hidden;
+    }
+    .equation-cell.fm {
+      border-top: 3px solid var(--fm-aqua);
+    }
+    .equation-cell.drift {
+      border-top: 3px solid var(--drift-blue);
+    }
+    .equation-label {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      color: var(--ink);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0;
+      line-height: 1.2;
+      padding: 0.85rem 0.95rem 0;
+    }
+    .equation-dot {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 999px;
+      background: var(--ink-muted);
+      flex: none;
+    }
+    .equation-cell.fm .equation-dot {
+      background: var(--fm-aqua);
+    }
+    .equation-cell.drift .equation-dot {
+      background: var(--drift-blue);
+    }
+    .equation-math {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-height: 6.7rem;
+      padding: 0.6rem 0.95rem 0.45rem;
+      color: var(--ink);
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+    .equation-math mjx-container {
+      margin: 0 !important;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.05rem 0 0.1rem;
+    }
+    .equation-cell-note {
+      border-top: 1px solid rgba(36,44,55,0.08);
+      color: var(--ink-2);
+      font-size: 0.88rem;
+      line-height: 1.38;
+      margin: 0;
+      padding: 0.72rem 0.95rem 0.82rem;
+    }
+    .equation-note {
+      color: var(--ink-2);
+      font-size: 0.92rem;
+      line-height: 1.42;
+      margin: 0;
+      padding: 0 1.15rem 1.05rem;
+    }
+    .keystone-equation-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 0.65fr);
+      gap: 1rem;
+      align-items: center;
+      padding: 1rem;
+    }
+    .keystone-equation-layout .equation-math {
+      min-height: 5.3rem;
+      border: 1px solid rgba(36,44,55,0.09);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(36,44,55,0.05);
+    }
+    .keystone-equation-layout .equation-note {
+      border-left: 3px solid rgba(27,175,122,0.40);
+      padding: 0 0 0 0.95rem;
+    }
+    .keystone-visual-shell {
+      position: relative;
+      left: 50%;
+      width: min(1000px, calc(100vw - 2rem));
+      margin: 1rem 0 1.4rem;
+      transform: translateX(-50%);
+    }
+    .keystone-panel {
+      border-color: rgba(42,120,214,0.30);
+      box-shadow: 0 14px 34px rgba(36,44,55,0.08);
+    }
+    .keystone-panel .explainer-caption {
+      text-align: center;
+      font-size: 0.96rem;
+    }
+    .result-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.85rem;
+      margin: 1.4rem 0 1.5rem;
+    }
+    .result-summary-card {
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 1rem 1.05rem;
+    }
+    .result-summary-card.highlight {
+      position: relative;
+      border: 2px solid transparent;
+      background:
+        linear-gradient(#ffffff, #ffffff) padding-box,
+        linear-gradient(135deg, var(--drift-blue), var(--fm-aqua)) border-box;
+      box-shadow: 0 16px 36px rgba(42,120,214,0.16);
+    }
+    .result-summary-card.highlight::before {
+      content: "";
+      position: absolute;
+      left: 1rem;
+      right: 1rem;
+      top: 0.6rem;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--drift-blue), var(--fm-aqua));
+    }
+    .result-summary-card h3 {
+      color: var(--ink);
+      font-size: 0.98rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin: 0 0 0.65rem;
+    }
+    .result-summary-card.highlight h3 {
+      padding-top: 0.45rem;
+    }
+    .result-summary-card dl {
+      display: grid;
+      gap: 0.45rem;
+      margin: 0;
+    }
+    .result-summary-card div {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: baseline;
+      border-top: 1px solid rgba(36,44,55,0.08);
+      padding-top: 0.45rem;
+    }
+    .result-summary-card dt {
+      color: var(--ink-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .result-summary-card dd {
+      color: var(--ink);
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin: 0;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .result-takeaway {
+      border: 1px solid rgba(42,120,214,0.28);
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(42,120,214,0.08), rgba(27,175,122,0.06));
+      color: var(--ink-2);
+      margin: 0 0 1.3rem;
+      padding: 0.9rem 1.05rem;
+      text-align: center;
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+
+    table.results-table { margin: 0 auto; }
+    table.results-table td, table.results-table th { vertical-align: middle; }
+    table.results-table td.num, table.results-table th.num {
+      text-align: right; font-variant-numeric: tabular-nums;
+    }
+    table.results-table th .th-main,
+    table.results-table th .th-sub {
+      display: block;
+      white-space: nowrap;
+    }
+    table.results-table th .th-main {
+      color: var(--ink);
+      font-weight: 800;
+    }
+    table.results-table th .th-sub {
+      color: var(--ink-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-top: 0.1rem;
+      text-transform: none;
+    }
+    .ablation-table {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .ablation-table thead th {
+      background: #f7f8fa;
+      color: var(--ink-2);
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .ablation-table td {
+      border-color: rgba(36, 44, 55, 0.08);
+    }
+    .rank-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.7rem;
+      height: 1.7rem;
+      border-radius: 999px;
+      background: #f1f3f5;
+      color: var(--ink-2);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .variant-name {
+      color: var(--ink);
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .variant-detail {
+      display: block;
+      margin-top: 0.15rem;
+      color: var(--ink-muted);
+      font-size: 0.84rem;
+      line-height: 1.25;
+    }
+    .best-result-banner {
+      border: 2px solid rgba(42,120,214,0.45);
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(42,120,214,0.10), rgba(42,120,214,0.03));
+      padding: 1rem 1.2rem;
+      margin: 0 auto 1.25rem;
+      max-width: 46rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.8rem 1.1rem;
+      align-items: center;
+    }
+    .best-result-score {
+      color: var(--drift-text);
+      display: grid;
+      gap: 0.18rem;
+      font-size: 2.1rem;
+      line-height: 1;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .best-result-score small {
+      color: var(--ink-muted);
+      font-size: 0.86rem;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+    .best-result-copy { color: var(--ink-2); line-height: 1.45; }
+    .best-result-copy strong { color: var(--ink); }
+    .best-badge {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(42,120,214,0.35);
+      border-radius: 999px;
+      padding: 0.12rem 0.5rem;
+      margin-left: 0.35rem;
+      color: var(--drift-text);
+      background: rgba(42,120,214,0.08);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    table.results-table tr.best-row td {
+      background: rgba(42,120,214,0.09) !important;
+      border-top: 2px solid rgba(42,120,214,0.45);
+      border-bottom: 2px solid rgba(27,175,122,0.42);
+    }
+    table.results-table tr.best-row td:first-child {
+      border-left: 2px solid rgba(42,120,214,0.45);
+    }
+    table.results-table tr.best-row td:last-child {
+      border-right: 2px solid rgba(27,175,122,0.42);
+    }
+    .table-footnote { color: var(--ink-muted); font-size: 0.85rem; max-width: 46rem; margin: 0.5rem auto 0; }
+
+    .rollout-matrix {
+      display: grid;
+      gap: 1.15rem;
+      margin-top: 1rem;
+    }
+    .realworld-matrix {
+      display: grid;
+      gap: 1.2rem;
+      margin: 1rem 0 1.4rem;
+    }
+    .realworld-scorecard {
+      max-width: 54rem;
+      margin: 1.15rem auto 1.35rem;
+      padding: 1rem;
+      border: 1px solid rgba(42,120,214,0.22);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(42,120,214,0.08), rgba(27,175,122,0.07)),
+        #ffffff;
+    }
+    .realworld-scorecard-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      margin-bottom: 0.85rem;
+    }
+    .realworld-scorecard-title {
+      color: var(--ink);
+      font-size: 1.05rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin: 0.2rem 0 0;
+    }
+    .realworld-scorecard-note {
+      color: var(--ink-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .realworld-bars {
+      display: grid;
+      gap: 0.65rem;
+    }
+    .realworld-bar-row {
+      display: grid;
+      grid-template-columns: minmax(11rem, 1.05fr) minmax(10rem, 1.7fr) auto;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid rgba(36,44,55,0.10);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.84);
+    }
+    .realworld-bar-row.best {
+      border-color: rgba(42,120,214,0.38);
+      background: rgba(42,120,214,0.08);
+      box-shadow: inset 3px 0 0 var(--drift-blue);
+    }
+    .realworld-bar-label {
+      color: var(--ink);
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .realworld-bar-track {
+      height: 0.62rem;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(36,44,55,0.09);
+    }
+    .realworld-bar-fill {
+      display: block;
+      width: var(--score);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--fm-aqua);
+    }
+    .realworld-bar-fill.drift {
+      background: linear-gradient(90deg, var(--drift-blue), var(--fm-aqua));
+    }
+    .realworld-bar-score {
+      color: var(--ink-muted);
+      min-width: 4.5rem;
+      text-align: right;
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+      text-transform: uppercase;
+    }
+    .realworld-bar-score strong {
+      display: block;
+      color: var(--ink);
+      font-size: 1.08rem;
+      line-height: 1.05;
+    }
+    .realworld-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+    .realworld-task-title {
+      color: var(--ink);
+      font-size: 0.98rem;
+      font-weight: 800;
+      margin: 0 0 0.5rem;
+    }
+    .rollout-case-title {
+      margin: 0 0 0.45rem;
+      color: var(--ink);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .rollout-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+    .eval-video-card {
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .eval-video-card.outcome-success {
+      border-color: rgba(42,120,214,0.42);
+      box-shadow: inset 0 0 0 1px rgba(42,120,214,0.08);
+    }
+    .eval-video-card.outcome-failure {
+      border-color: rgba(179,82,64,0.28);
+      background: #fffdfb;
+    }
+    .eval-video-card.model-best {
+      border-color: rgba(42,120,214,0.45);
+      box-shadow: 0 14px 32px rgba(42,120,214,0.12);
+    }
+    .eval-video-card.model-compare {
+      border-color: rgba(36,44,55,0.14);
+    }
+    .eval-video-card video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      background: #f7f7f4;
+    }
+    .eval-video-caption {
+      padding: 0.7rem 0.85rem 0.8rem;
+      color: var(--ink-2);
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+    .eval-video-caption strong {
+      color: var(--ink);
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+    .outcome-tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.08rem 0.45rem;
+      margin-left: 0.3rem;
+      font-size: 0.74rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .outcome-tag.success {
+      color: #1b5f35;
+      background: rgba(45,145,82,0.13);
+    }
+    .outcome-tag.failure {
+      color: #8f3328;
+      background: rgba(179,82,64,0.13);
+    }
+    .model-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.08rem 0.45rem;
+      margin-left: 0.3rem;
+      color: var(--ink-muted);
+      background: rgba(36,44,55,0.07);
+      font-size: 0.72rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .model-badge.best {
+      color: var(--drift-text);
+      background: rgba(42,120,214,0.10);
+    }
+
+    @media (max-width: 640px) {
+      .best-result-banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .best-result-score { font-size: 1.85rem; }
+      .hero-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .equation-header {
+        display: block;
+      }
+      .equation-pill {
+        display: inline-flex;
+        margin-top: 0.65rem;
+      }
+      .equation-grid { grid-template-columns: 1fr; }
+      .keystone-equation-layout { grid-template-columns: 1fr; }
+      .keystone-equation-layout .equation-note {
+        border-left: 0;
+        border-top: 1px solid rgba(36,44,55,0.10);
+        padding: 0.85rem 0 0;
+      }
+      .result-summary { grid-template-columns: 1fr; }
+      .realworld-teaser { grid-template-columns: 1fr; }
+      .realworld-teaser-copy {
+        padding: 0.1rem 0.2rem 0.25rem;
+        text-align: center;
+      }
+      .realworld-teaser-pills { justify-content: center; }
+      .realworld-scorecard-head {
+        display: block;
+        text-align: center;
+      }
+      .realworld-scorecard-note {
+        margin-top: 0.35rem;
+        text-align: center;
+        white-space: normal;
+      }
+      .realworld-bar-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+      .realworld-bar-score {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        min-width: 0;
+        text-align: left;
+      }
+      .realworld-row { grid-template-columns: 1fr; }
+      .rollout-row { grid-template-columns: 1fr; }
+    }
+
+    .references-list {
+      max-width: 52rem;
+      margin: 0 auto;
+      border-top: 1px solid var(--hairline);
+    }
+    .reference-item {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--hairline);
+      color: var(--ink-2);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+    .reference-item a {
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .reference-item span {
+      display: block;
+      margin-top: 0.2rem;
+      color: var(--ink-muted);
+      font-size: 0.88rem;
+    }
+    .section.tight { padding-top: 2rem; padding-bottom: 2rem; }
+  </style>
+</head>
+<body>
+
+  <button class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <main id="main-content">
+
+  <!-- ==================== S0 · HERO ==================== -->
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">Drift-VLA: Fast Vision&#8209;Language&#8209;Action Policies with One&#8209;Step Drifting</h1>
+            <p class="hero-subtitle">
+              One-step SmolVLA action generation: <span class="w-key">92.3 ±0.6%</span>
+              success at <span class="w-speed">53.5&nbsp;ms/chunk</span> with KeyStone.
+            </p>
+
+            <div class="is-size-5 publication-authors" style="margin-top:1rem;">
+              <span class="author-block"><a href="https://github.com/zuoxingdong/" target="_blank" rel="noopener noreferrer">Xingdong Zuo</a></span>
+            </div>
+
+            <div class="hero-link-panel" aria-label="Project links">
+              <div class="publication-links hero-resource-links" aria-label="Paper and code">
+                <span class="link-block">
+                  <a href="static/papers/drift-vla.pdf" class="button is-normal is-rounded is-dark" target="_blank" rel="noopener noreferrer">
+                    <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://github.com/zuoxingdong/smolvla-drift/tree/smolvla-drift" class="button is-normal is-rounded is-dark" target="_blank" rel="noopener noreferrer">
+                    <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
+                  </a>
+                </span>
+              </div>
+              <div class="publication-links hero-nav-links" aria-label="Page navigation">
+                <span class="link-block">
+                  <a href="#results" class="button is-normal is-rounded">
+                    <span class="icon"><i class="fas fa-chart-line"></i></span><span>Results</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="#method" class="button is-normal is-rounded">
+                    <span class="icon"><i class="fas fa-project-diagram"></i></span><span>Method</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="#rollouts" class="button is-normal is-rounded">
+                    <span class="icon"><i class="fas fa-play-circle"></i></span><span>Rollouts</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="#ablation" class="button is-normal is-rounded">
+                    <span class="icon"><i class="fas fa-table"></i></span><span>Ablation</span>
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== S1 · TOP MECHANISM ANIMATION ==================== -->
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body" style="padding-top:0;">
+        <figure class="explainer-panel top-animation-panel">
+          <img src="static/images/drift_vla_anim_sampler.gif" alt="Animated comparison showing flow matching taking multiple small solver steps while Drift-VLA samples in one step.">
+          <figcaption class="explainer-caption top-animation-caption">
+            <strong>Same SmolVLA backbone, same data.</strong>
+            Flow matching spends 10 expert passes per action chunk. Drift-VLA uses
+            one; batched KeyStone selection lifts the best result to 92.3 ±0.6%.
+          </figcaption>
+        </figure>
+        <div class="hero-metrics" aria-label="Headline metrics">
+          <div class="hero-metric">
+            <strong>1</strong>
+            <span>NFE inference</span>
+          </div>
+          <div class="hero-metric">
+            <strong>90.2%</strong>
+            <span>base success</span>
+          </div>
+          <div class="hero-metric">
+            <strong>92.3%</strong>
+            <span>best ±0.6</span>
+          </div>
+          <div class="hero-metric">
+            <strong>4.4×</strong>
+            <span>lower latency</span>
+          </div>
+        </div>
+
+        <div class="realworld-teaser" aria-label="Real-world LeKiwi shopping teaser">
+          <figure class="realworld-teaser-media">
+            <video controls autoplay muted loop playsinline webkit-playsinline preload="metadata" poster="static/images/posters/realworld_shop_salt_drift_keystone.jpg">
+              <source src="static/videos/realworld_shop_salt_drift_keystone.mp4" type="video/mp4">
+            </video>
+          </figure>
+          <div class="realworld-teaser-copy">
+            <div class="realworld-kicker">Real robot rollout</div>
+            <div class="realworld-teaser-title">LeKiwi shopping with one-step Drift-VLA + KeyStone</div>
+            <p>
+              Pick the requested item, carry it to the customer basket, and recover
+              online with fast action chunks.
+            </p>
+            <div class="realworld-teaser-pills" aria-label="Real-world rollout attributes">
+              <span class="realworld-pill">1 NFE</span>
+              <span class="realworld-pill">KeyStone</span>
+              <span class="realworld-pill">Action-dimension drift</span>
+            </div>
+            <a class="realworld-teaser-link" href="#rollouts">See the full 3×3 comparison</a>
+          </div>
+          <div class="realworld-scorecard" aria-label="Salt bottle real-world success rates from 10 rollouts per policy">
+            <div class="realworld-scorecard-head">
+              <div>
+                <div class="realworld-kicker">Repeated real-world trial</div>
+                <h4 class="realworld-scorecard-title">Salt bottle: 10 rollouts per policy</h4>
+              </div>
+              <div class="realworld-scorecard-note">Same initial scene</div>
+            </div>
+            <div class="realworld-bars">
+              <div class="realworld-bar-row best">
+                <div class="realworld-bar-label"><span class="chip drift">Drift-VLA + KeyStone</span></div>
+                <div class="realworld-bar-track" aria-hidden="true"><span class="realworld-bar-fill drift" style="--score: 90%;"></span></div>
+                <div class="realworld-bar-score"><strong>9/10</strong><span>90%</span></div>
+              </div>
+              <div class="realworld-bar-row">
+                <div class="realworld-bar-label"><span class="chip fm">SmolVLA-FM (10 steps)</span></div>
+                <div class="realworld-bar-track" aria-hidden="true"><span class="realworld-bar-fill" style="--score: 70%;"></span></div>
+                <div class="realworld-bar-score"><strong>7/10</strong><span>70%</span></div>
+              </div>
+              <div class="realworld-bar-row">
+                <div class="realworld-bar-label"><span class="chip fm">SmolVLA-FM (1 step)</span></div>
+                <div class="realworld-bar-track" aria-hidden="true"><span class="realworld-bar-fill" style="--score: 30%;"></span></div>
+                <div class="realworld-bar-score"><strong>3/10</strong><span>30%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== S2 · TL;DR ==================== -->
+  <section class="section tight">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">At a Glance</h2>
+      <div class="tldr-card">
+        <p>
+          <span class="w-drift">Drift-VLA</span> keeps SmolVLA&rsquo;s backbone, data,
+          observations, and action chunks fixed. It replaces
+          <span class="w-fm">iterative flow matching</span> with
+          <span class="w-drift">one-step drifting</span> in the action expert.
+          The winning recipe is <span class="w-key">action-dimension drift + KeyStone</span>:
+          <strong>92.3 ±0.6%</strong> LIBERO-Spatial success at
+          <strong>53.5&nbsp;ms/chunk</strong>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== S4 · MOTIVATION (A3) ==================== -->
+  <section class="section tight hero is-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Why one-step matters</h2>
+          <p class="section-lead">
+            Iterative VLA samplers spend <strong>K expert passes</strong> per action chunk.
+            Drift-VLA asks whether one pass can keep FM-level success.
+          </p>
+          <div class="figure-block">
+            <img src="static/images/a3_latency_breakdown.svg" alt="Stacked latency bars per method: shared VLM prefix cost plus action-expert cost times K.">
+            <p class="figure-caption">
+              The shared VLM prefix is paid once; the repeated action-expert calls are
+              what one-step drifting removes.
+            </p>
+          </div>
+          <p class="section-lead" style="margin-top:1rem;">
+            Base Drift-VLA runs at <span class="w-speed">50.6&nbsp;ms/chunk</span>;
+            FM-10 runs at 232.9&nbsp;ms/chunk. That headroom pays for
+            <span class="w-key">KeyStone</span> while staying at 53.5&nbsp;ms/chunk.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== S4b · BACKGROUND ==================== -->
+  <section class="section tight">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Two Action Samplers</h2>
+          <p class="section-lead">
+            Same observation context, same action chunk. The difference is how the
+            action expert is trained and sampled.
+          </p>
+          <div class="columns">
+            <div class="column">
+              <div class="primer-card fm">
+                <h3><span class="chip fm">Flow matching</span></h3>
+                <p>
+                  Learns a <strong>velocity field</strong>. Inference integrates it over
+                  multiple solver steps, so higher quality means repeated action-expert
+                  evaluations.
+                </p>
+              </div>
+            </div>
+            <div class="column">
+              <div class="primer-card drift">
+                <h3><span class="chip drift">Drifting</span></h3>
+                <p>
+                  Trains the generator <strong>directly</strong>. Inference is one
+                  forward pass of the action expert: no solver loop and no distillation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="training-visual-shell" aria-label="Training objective comparison">
+      <h3 class="title is-5 training-title">Training signal</h3>
+      <div class="training-panel-stack">
+        <figure class="explainer-panel training-panel fm">
+          <img src="static/images/drift_vla_anim_training_fm.gif" alt="Animated flow-matching training view: noise samples are paired with demonstration actions and a velocity direction is learned." loading="lazy">
+          <figcaption class="explainer-caption">
+            <strong>Flow matching learns a direction field.</strong>
+            Training pairs noise with demonstrations; inference follows the learned
+            field over multiple solver steps.
+          </figcaption>
+        </figure>
+        <figure class="explainer-panel training-panel drift">
+          <img src="static/images/drift_vla_anim_training_drifting.gif" alt="Animated drifting training view: model samples are pulled toward demonstrations while being kept separated." loading="lazy">
+          <figcaption class="explainer-caption">
+            <strong>Drifting trains the generator directly.</strong>
+            Samples move toward demonstrations while staying diverse, so the action
+            expert can sample in one pass.
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== S5 · METHOD (A4) ==================== -->
+  <section class="section tight hero is-light" id="method">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Method</h2>
+          <p class="section-lead">
+            <strong>Only the action expert objective changes.</strong> The backbone,
+            observations, action chunks, and data stay fixed.
+          </p>
+          <p class="section-lead">
+            The winning loss is <span class="w-key">action-dimension drift</span>:
+            each real action dimension&rsquo;s chunk trajectory is matched separately.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="formula-showcase">
+      <div class="equation-panel" aria-label="Flow matching and drifting objectives">
+        <div class="equation-header">
+          <div>
+            <div class="equation-kicker">Training objective</div>
+            <div class="equation-title">From iterative transport to one-step drifting</div>
+          </div>
+          <div class="equation-pill">same backbone + data</div>
+        </div>
+        <div class="equation-grid">
+          <div class="equation-cell fm">
+            <div class="equation-label"><span class="equation-dot" aria-hidden="true"></span>SmolVLA-FM</div>
+            <div class="equation-math">
+              \[
+                x_t = t\epsilon + (1-t)a,\qquad
+                \mathcal{L}_{\mathrm{FM}} =
+                \lVert v_\theta(x_t,t) - (\epsilon-a) \rVert^2
+              \]
+            </div>
+            <p class="equation-cell-note">
+              Learn a velocity field; sample by integrating multiple expert steps.
+            </p>
+          </div>
+          <div class="equation-cell drift">
+            <div class="equation-label"><span class="equation-dot" aria-hidden="true"></span>Drift-VLA</div>
+            <div class="equation-math">
+              \[
+                \mathcal{L}_{\mathrm{drift}} =
+                \left\lVert g/s -
+                \operatorname{sg}\!\left(g/s+V\right)
+                \right\rVert^2
+              \]
+            </div>
+            <p class="equation-cell-note">
+              Train the generator directly; sample the full chunk in one expert pass.
+            </p>
+          </div>
+        </div>
+        <div class="equation-note">
+          \(V\) pulls generated samples toward demonstrations and separates sibling samples.
+          Drift-VLA applies it per action dimension across the full chunk.
+        </div>
+      </div>
+    </div>
+    <div class="method-visual-shell" aria-label="Drift-VLA training pipeline">
+      <figure class="explainer-panel method-pipeline-panel">
+        <img src="static/images/drift_vla_anim_pipeline.gif" alt="Animated Drift-VLA pipeline: observations are encoded once, the action expert samples, drifting updates the action expert, and the prefix remains shared." loading="lazy">
+        <figcaption class="explainer-caption">
+          <strong>End-to-end training pipeline.</strong>
+          SmolVLA&rsquo;s observation encoder and action interface stay intact; the
+          action expert trains with action-dimension drifting.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ==================== S6 · RESULTS (A5 + T1 + ablations) ==================== -->
+  <section class="section tight" id="results">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Results</h2>
+
+          <div class="best-result-banner" aria-label="Best observed result">
+            <div class="best-result-score"><span>92.3%</span><small>±0.6</small></div>
+            <div class="best-result-copy">
+              <strong>Best observed:</strong> <span class="w-key">action-dimension Drift-VLA + KeyStone</span>.
+              It reaches 92.3 ±0.6% at 53.5&nbsp;ms/chunk; the base one-step model
+              is 90.2 ±1.3% at 50.6&nbsp;ms/chunk.
+            </div>
+          </div>
+
+          <div class="keystone-visual-shell" aria-label="KeyStone inference-time self-consistency">
+            <figure class="explainer-panel keystone-panel">
+              <img src="static/images/drift_vla_anim_keystone.gif" alt="Animated KeyStone inference pipeline: Drift-VLA samples multiple one-step action chunks, finds a consensus candidate, and executes the selected action chunk." loading="lazy">
+              <figcaption class="explainer-caption">
+                <strong>KeyStone at inference time.</strong>
+                Drift-VLA samples multiple one-step chunks, selects the consensus
+                candidate, and executes it. No retraining or new data.
+              </figcaption>
+            </figure>
+            <div class="equation-panel compact" aria-label="KeyStone consensus selection equation">
+              <div class="equation-header">
+                <div>
+                  <div class="equation-kicker">Inference selector</div>
+                  <div class="equation-title">KeyStone consensus over one-step samples</div>
+                </div>
+                <div class="equation-pill">8× Drift-VLA</div>
+              </div>
+              <div class="keystone-equation-layout">
+                <div class="equation-math">
+                  \[
+                    \hat a =
+                    \operatorname{medoid}\!\left(
+                      \operatorname{largest\ cluster}
+                      \left(\{ f_\theta(\epsilon_k) \}_{k=1}^{K}\right)
+                    \right)
+                  \]
+                </div>
+                <div class="equation-note">
+                  KeyStone chooses the representative chunk from the dominant candidate cluster.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="result-summary" aria-label="Speed and success summary">
+            <div class="result-summary-card">
+              <h3>SmolVLA-FM (10 steps)</h3>
+              <dl>
+                <div><dt>Success</dt><dd>88.0 ±1.5%</dd></div>
+                <div><dt>Latency</dt><dd>232.9 ms</dd></div>
+                <div><dt>NFE</dt><dd>10</dd></div>
+              </dl>
+            </div>
+            <div class="result-summary-card">
+              <h3>Drift-VLA</h3>
+              <dl>
+                <div><dt>Success</dt><dd>90.2 ±1.3%</dd></div>
+                <div><dt>Latency</dt><dd>50.6 ms</dd></div>
+                <div><dt>NFE</dt><dd>1</dd></div>
+              </dl>
+            </div>
+            <div class="result-summary-card highlight">
+              <h3>Drift-VLA + KeyStone</h3>
+              <dl>
+                <div><dt>Success</dt><dd>92.3 ±0.6%</dd></div>
+                <div><dt>Latency</dt><dd>53.5 ms</dd></div>
+                <div><dt>Sampling</dt><dd>8×1</dd></div>
+              </dl>
+            </div>
+          </div>
+          <p class="result-takeaway">
+            <span class="w-drift">Base Drift-VLA</span> already exceeds FM-10 while
+            running <span class="w-speed">4.6× faster</span>. KeyStone spends a small
+            part of that headroom and still runs <span class="w-speed">4.4× faster</span>.
+          </p>
+
+          <div class="table-container" style="margin-top:1.5rem;">
+            <table class="table results-table is-striped is-hoverable">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th class="num">NFE</th>
+                  <th class="num"><span class="th-main">Latency</span><span class="th-sub">ms / chunk</span></th>
+                  <th class="num"><span class="th-main">Success (%)</span><span class="th-sub">LIBERO-Spatial · 200 eps × 3</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="chip fm">SmolVLA-FM (10 steps)</span></td>
+                  <td class="num">10</td>
+                  <td class="num">232.9</td>
+                  <td class="num"><strong>88.0 ± 1.5</strong></td>
+                </tr>
+                <tr>
+                  <td><span class="chip fm">SmolVLA-FM (1 step)</span></td>
+                  <td class="num">1</td>
+                  <td class="num"><strong>50.1</strong></td>
+                  <td class="num">84.0 ± 2.0</td>
+                </tr>
+                <tr>
+                  <td><span class="chip drift"><strong>Drift-VLA (action-dimension drift)</strong></span></td>
+                  <td class="num"><strong>1</strong></td>
+                  <td class="num">50.6</td>
+                  <td class="num"><strong>90.2 ± 1.3</strong></td>
+                </tr>
+                <tr class="best-row">
+                  <td><span class="chip drift"><strong>Drift-VLA (action-dimension drift) + KeyStone</strong></span><span class="best-badge">Best observed</span></td>
+                  <td class="num">8×1</td>
+                  <td class="num"><strong>53.5</strong></td>
+                  <td class="num"><strong>92.3 ± 0.6</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="title is-4 has-text-centered" id="rollouts" style="margin-top:2rem;">Real-World Shopping Rollouts</h3>
+          <p class="section-lead">
+            Representative LeKiwi rollouts across three shop items. Drift-VLA + KeyStone
+            is shown beside the flow-matching baselines under the same task framing.
+          </p>
+          <div class="realworld-matrix" aria-label="Real-world LeKiwi shopping rollouts">
+            <div class="realworld-task">
+              <h4 class="realworld-task-title">Matcha tin</h4>
+              <div class="realworld-row">
+                <div class="eval-video-card model-best">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/realworld_shop_matcha_drift_keystone.jpg">
+                    <source src="static/videos/realworld_shop_matcha_drift_keystone.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>Drift-VLA + KeyStone <span class="model-badge best">1 NFE</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card model-compare">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/realworld_shop_matcha_fm10.jpg">
+                    <source src="static/videos/realworld_shop_matcha_fm10.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>SmolVLA-FM <span class="model-badge">10 NFE</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card model-compare">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/realworld_shop_matcha_fm1.jpg">
+                    <source src="static/videos/realworld_shop_matcha_fm1.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>SmolVLA-FM <span class="model-badge">1 NFE</span></strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="realworld-task">
+              <h4 class="realworld-task-title">Salt bottle</h4>
+              <div class="realworld-row">
+                <div class="eval-video-card model-best">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/realworld_shop_salt_drift_keystone.jpg">
+                    <source src="static/videos/realworld_shop_salt_drift_keystone.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>Drift-VLA + KeyStone <span class="model-badge best">1 NFE</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card model-compare">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/realworld_shop_salt_fm10.jpg">
+                    <source src="static/videos/realworld_shop_salt_fm10.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>SmolVLA-FM <span class="model-badge">10 NFE</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card model-compare">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/realworld_shop_salt_fm1.jpg">
+                    <source src="static/videos/realworld_shop_salt_fm1.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>SmolVLA-FM <span class="model-badge">1 NFE</span></strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="realworld-task">
+              <h4 class="realworld-task-title">Chocolate bar</h4>
+              <div class="realworld-row">
+                <div class="eval-video-card model-best">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/realworld_shop_chocolate_drift_keystone.jpg">
+                    <source src="static/videos/realworld_shop_chocolate_drift_keystone.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>Drift-VLA + KeyStone <span class="model-badge best">1 NFE</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card model-compare">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/realworld_shop_chocolate_fm10.jpg">
+                    <source src="static/videos/realworld_shop_chocolate_fm10.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>SmolVLA-FM <span class="model-badge">10 NFE</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card model-compare">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/realworld_shop_chocolate_fm1.jpg">
+                    <source src="static/videos/realworld_shop_chocolate_fm1.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>SmolVLA-FM <span class="model-badge">1 NFE</span></strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="title is-4 has-text-centered" id="ablation" style="margin-top:2rem;">Drift Grouping Ablation</h3>
+          <p class="section-lead">
+            <span class="w-key">Action-dimension drift</span> is the strongest and most
+            stable grouping: match each action dimension&rsquo;s chunk trajectory separately.
+          </p>
+          <div class="table-container">
+            <table class="table results-table ablation-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Drift grouping</th>
+                  <th class="num">20k SR (%)</th>
+                  <th class="num">30k SR (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="best-row">
+                  <td><span class="rank-chip">1</span></td>
+                  <td>
+                    <div class="variant-name">Action-dimension drift</div>
+                    <span class="variant-detail">one matching unit per action dimension</span>
+                  </td>
+                  <td class="num"><strong>89.0 ±1.4</strong></td>
+                  <td class="num"><strong>90.2 ±1.3</strong></td>
+                </tr>
+                <tr>
+                  <td><span class="rank-chip">2</span></td>
+                  <td>
+                    <div class="variant-name">Chunk-level drift</div>
+                    <span class="variant-detail">joint matching over the complete action chunk</span>
+                  </td>
+                  <td class="num">86.5 ±2.1</td>
+                  <td class="num">77.8</td>
+                </tr>
+                <tr>
+                  <td><span class="rank-chip">3</span></td>
+                  <td>
+                    <div class="variant-name">Timestep drift (8 samples)</div>
+                    <span class="variant-detail">per-timestep matching with 8 sibling samples</span>
+                  </td>
+                  <td class="num">78.8</td>
+                  <td class="num">81.3</td>
+                </tr>
+                <tr>
+                  <td><span class="rank-chip">4</span></td>
+                  <td>
+                    <div class="variant-name">Timestep drift (16 samples)</div>
+                    <span class="variant-detail">same grouping with more sibling samples</span>
+                  </td>
+                  <td class="num">76.5</td>
+                  <td class="num">79.0</td>
+                </tr>
+                <tr>
+                  <td><span class="rank-chip">5</span></td>
+                  <td>
+                    <div class="variant-name">Timestep drift (4 samples)</div>
+                    <span class="variant-detail">same grouping with fewer sibling samples</span>
+                  </td>
+                  <td class="num">78.8</td>
+                  <td class="num">78.8</td>
+                </tr>
+                <tr>
+                  <td><span class="rank-chip">6</span></td>
+                  <td>
+                    <div class="variant-name">Shared-temperature drift</div>
+                    <span class="variant-detail">one temperature shared across dimensions</span>
+                  </td>
+                  <td class="num">70.0</td>
+                  <td class="num">78.0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-footnote">
+            Same SmolVLA setup and data; only the drift grouping changes.
+          </p>
+
+          <h3 class="title is-4 has-text-centered" id="libero-rollouts" style="margin-top:2rem;">LIBERO Rollouts</h3>
+          <p class="section-lead">
+            Three LIBERO-Spatial cases: the best Drift-VLA setup succeeds, while the
+            comparison variants fail on the same tasks.
+          </p>
+          <div class="rollout-matrix">
+            <div class="rollout-case">
+              <h4 class="rollout-case-title">Case A</h4>
+              <div class="rollout-row">
+                <div class="eval-video-card outcome-success">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/libero_case_a_ours.jpg">
+                    <source src="static/videos/libero_case_a_ours.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>Drift-VLA + KeyStone <span class="outcome-tag success">success</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card outcome-failure">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/libero_case_a_fm10.jpg">
+                    <source src="static/videos/libero_case_a_fm10.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>SmolVLA-FM (10 steps) <span class="outcome-tag failure">failure</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card outcome-failure">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/libero_case_a_timestep4.jpg">
+                    <source src="static/videos/libero_case_a_timestep4.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>Timestep drift (4 samples) <span class="outcome-tag failure">failure</span></strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="rollout-case">
+              <h4 class="rollout-case-title">Case B</h4>
+              <div class="rollout-row">
+                <div class="eval-video-card outcome-success">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/libero_case_b_ours.jpg">
+                    <source src="static/videos/libero_case_b_ours.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>Drift-VLA + KeyStone <span class="outcome-tag success">success</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card outcome-failure">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/libero_case_b_fm10.jpg">
+                    <source src="static/videos/libero_case_b_fm10.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>SmolVLA-FM (10 steps) <span class="outcome-tag failure">failure</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card outcome-failure">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/libero_case_b_timestep4.jpg">
+                    <source src="static/videos/libero_case_b_timestep4.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>Timestep drift (4 samples) <span class="outcome-tag failure">failure</span></strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="rollout-case">
+              <h4 class="rollout-case-title">Case C</h4>
+              <div class="rollout-row">
+                <div class="eval-video-card outcome-success">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/libero_case_c_ours.jpg">
+                    <source src="static/videos/libero_case_c_ours.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>Drift-VLA + KeyStone <span class="outcome-tag success">success</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card outcome-failure">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/libero_case_c_fm10.jpg">
+                    <source src="static/videos/libero_case_c_fm10.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>SmolVLA-FM (10 steps) <span class="outcome-tag failure">failure</span></strong>
+                  </p>
+                </div>
+                <div class="eval-video-card outcome-failure">
+                  <video controls muted loop playsinline webkit-playsinline preload="none" poster="static/images/posters/libero_case_c_timestep4.jpg">
+                    <source src="static/videos/libero_case_c_timestep4.mp4" type="video/mp4">
+                  </video>
+                  <p class="eval-video-caption">
+                    <strong>Timestep drift (4 samples) <span class="outcome-tag failure">failure</span></strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== S7 · REFERENCES ==================== -->
+  <section class="section tight">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">References</h2>
+      <div class="references-list">
+        <div class="reference-item">
+          <a href="https://arxiv.org/abs/2506.01844" target="_blank" rel="noopener noreferrer">SmolVLA: A Vision-Language-Action Model for Affordable and Efficient Robotics</a>
+          <span>Shukor et al., arXiv 2025.</span>
+        </div>
+        <div class="reference-item">
+          <a href="https://arxiv.org/abs/2602.04770" target="_blank" rel="noopener noreferrer">Generative Modeling via Drifting</a>
+          <span>Deng et al., arXiv 2026.</span>
+        </div>
+        <div class="reference-item">
+          <a href="https://arxiv.org/abs/2605.08638" target="_blank" rel="noopener noreferrer">Geometry Guided Self-Consistency for Physical AI</a>
+          <span>Dai et al., arXiv 2026. Introduces KeyStone.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== S8 · FOOTER ==================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank" rel="noopener noreferrer">Academic Project Page Template</a>,
+              adopted from the <a href="https://nerfies.github.io" target="_blank" rel="noopener noreferrer">Nerfies</a> project page.
+              You are free to borrow the source code of this website; we just ask that you link back in the footer.
+              This website is licensed under a
+              <a rel="license noopener noreferrer" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  </main>
+</body>
+</html>

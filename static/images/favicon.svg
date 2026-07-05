@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Drift-VLA mark: D monogram with one-step arrow cutout.
+       Blue = Drift-VLA accent #2a78d6. -->
+  <rect x="0" y="0" width="64" height="64" rx="14" fill="#2a78d6"/>
+  <path
+    fill="#ffffff"
+    fill-rule="evenodd"
+    d="M16 11h17c4.5 0 8.5.8 12 2.5 3.5 1.7 6.2 4.1 8.1 7.2C55 23.9 56 27.6 56 32s-1 8.1-2.9 11.3c-1.9 3.1-4.6 5.5-8.1 7.2C41.5 52.2 37.5 53 33 53H16V11Zm12 10v22h4.8c4 0 7.2-.9 9.5-2.8 2.4-1.9 3.6-4.6 3.6-8.2s-1.2-6.3-3.6-8.2C40 21.9 36.8 21 32.8 21H28Z"/>
+  <path
+    fill="#2a78d6"
+    d="M23 27.5h13.2V22L51 32 36.2 42v-5.5H23z"/>
+</svg>

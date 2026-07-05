@@ -1,0 +1,27 @@
+{
+  "_comment": "Single source of truth for headline chart numbers. Latency is measured per action chunk; FM-10 was remeasured on 2026-07-05 as the median of 3 rounds. Prefix/expert split is derived from FM ns1/ns10 totals assuming one shared prefix and repeated expert passes; totals match measured values. Drift = action-dimension drift @30k.",
+  "prefix_lat_ms": 29.8,
+  "methods": {
+    "fm_ns10": {
+      "label": "SmolVLA-FM (10 steps)",
+      "nfe": 10,
+      "sr_mean": 88.0,
+      "sr_std": 1.5,
+      "expert_lat_ms": 203.1
+    },
+    "fm_ns1": {
+      "label": "SmolVLA-FM (1 step)",
+      "nfe": 1,
+      "sr_mean": 84.0,
+      "sr_std": 2.0,
+      "expert_lat_ms": 20.3
+    },
+    "drift": {
+      "label": "Drift-VLA (ours)",
+      "nfe": 1,
+      "sr_mean": 90.2,
+      "sr_std": 1.3,
+      "expert_lat_ms": 20.8
+    }
+  }
+}
