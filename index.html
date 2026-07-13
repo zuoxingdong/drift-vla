@@ -6,7 +6,7 @@
 
   <!-- Primary Meta Tags -->
   <meta name="title" content="Drift-VLA: Fast Vision-Language-Action Policies with One-Step Drifting">
-  <meta name="description" content="Action-dimension Drift-VLA reaches 90.2% at 1 NFE; with KeyStone self-consistency, the best observed LIBERO-Spatial result is 92.3 ±0.6% at 53.5 ms/chunk.">
+  <meta name="description" content="Drift-VLA replaces iterative flow matching with a one-step drifting objective: one expert pass per action chunk matches the 10-step sampler on SmolVLA and Pi0.5 across all four LIBERO suites, with up to 4.4x faster decoding and real-robot deployment.">
   <meta name="keywords" content="vision-language-action, VLA, SmolVLA, flow matching, drifting, one-step generation, robot learning, LIBERO, edge robotics">
   <meta name="author" content="Xingdong Zuo">
   <meta name="robots" content="index, follow">
@@ -14,7 +14,7 @@
   <!-- Open Graph -->
   <meta property="og:type" content="article">
   <meta property="og:title" content="Drift-VLA: Fast Vision-Language-Action Policies with One-Step Drifting">
-  <meta property="og:description" content="Action-dimension Drift-VLA reaches 90.2% at 1 NFE; with KeyStone self-consistency, the best observed LIBERO-Spatial result is 92.3 ±0.6% at 53.5 ms/chunk.">
+  <meta property="og:description" content="Drift-VLA replaces iterative flow matching with a one-step drifting objective: one expert pass per action chunk matches the 10-step sampler on SmolVLA and Pi0.5 across all four LIBERO suites, with up to 4.4x faster decoding and real-robot deployment.">
   <meta property="og:url" content="https://zuoxingdong.github.io/drift-vla/">
   <meta property="og:image" content="https://zuoxingdong.github.io/drift-vla/static/images/og_preview.png">
   <meta property="og:image:width" content="1200">
@@ -23,7 +23,7 @@
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Drift-VLA: Fast Vision-Language-Action Policies with One-Step Drifting">
-  <meta name="twitter:description" content="Action-dimension Drift-VLA reaches 90.2% at 1 NFE; with KeyStone self-consistency, the best observed LIBERO-Spatial result is 92.3 ±0.6% at 53.5 ms/chunk.">
+  <meta name="twitter:description" content="Drift-VLA replaces iterative flow matching with a one-step drifting objective: one expert pass per action chunk matches the 10-step sampler on SmolVLA and Pi0.5 across all four LIBERO suites, with up to 4.4x faster decoding and real-robot deployment.">
   <meta name="twitter:image" content="https://zuoxingdong.github.io/drift-vla/static/images/og_preview.png">
 
   <title>Drift-VLA: Fast Vision-Language-Action Policies with One-Step Drifting</title>
@@ -99,6 +99,7 @@
     }
 
     .figure-block { margin: 0 auto; text-align: center; }
+    .figure-block.wide { margin-left: -8%; margin-right: -8%; max-width: 116%; }
     .figure-block img, .figure-block video { max-width: 100%; height: auto; }
     .figure-caption {
       color: var(--ink-2); font-size: 0.92rem; max-width: 46rem;
@@ -192,17 +193,48 @@
       margin: 1rem auto 0;
     }
     .hero-metric {
+      position: relative;
       border: 1px solid var(--hairline);
-      border-radius: 8px;
+      border-radius: 10px;
       background: #ffffff;
-      padding: 0.85rem 0.9rem;
+      padding: 1rem 0.9rem 0.9rem;
       text-align: center;
+      box-shadow: 0 1px 3px rgba(11,11,11,0.04);
+      overflow: hidden;
+    }
+    .hero-metric::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--drift-text);
+    }
+    .hero-metric .metric-kicker {
+      display: block;
+      color: var(--ink-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
     }
     .hero-metric strong {
       display: block;
-      color: var(--ink);
-      font-size: 1.35rem;
-      line-height: 1.1;
+      color: var(--drift-text);
+      font-size: 1.75rem;
+      line-height: 1.05;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .hero-metric .metric-compare {
+      display: inline-block;
+      margin-top: 0.45rem;
+      padding: 0.1rem 0.55rem;
+      border-radius: 999px;
+      background: #f1f1ec;
+      color: var(--ink-muted);
+      font-size: 0.74rem;
+      font-weight: 700;
       font-variant-numeric: tabular-nums;
     }
     .hero-metric span {
@@ -1037,8 +1069,9 @@
           <div class="column has-text-centered">
             <h1 class="title is-1 publication-title">Drift-VLA: Fast Vision&#8209;Language&#8209;Action Policies with One&#8209;Step Drifting</h1>
             <p class="hero-subtitle">
-              One-step SmolVLA action generation: <span class="w-key">92.3 ±0.6%</span>
-              success at <span class="w-speed">53.5&nbsp;ms/chunk</span> with KeyStone.
+              <span class="w-drift">One-step actions</span> that match
+              <span class="w-fm">iterative flow matching</span>,
+              for <span class="w-speed">faster, more reactive</span> robot policies.
             </p>
 
             <div class="is-size-5 publication-authors" style="margin-top:1rem;">
@@ -1075,6 +1108,11 @@
                   </a>
                 </span>
                 <span class="link-block">
+                  <a href="#pi05" class="button is-normal is-rounded">
+                    <span class="icon"><i class="fas fa-robot"></i></span><span>Pi0.5</span>
+                  </a>
+                </span>
+                <span class="link-block">
                   <a href="#ablation" class="button is-normal is-rounded">
                     <span class="icon"><i class="fas fa-table"></i></span><span>Ablation</span>
                   </a>
@@ -1099,27 +1137,32 @@
         <figure class="explainer-panel top-animation-panel">
           <img src="static/images/drift_vla_anim_sampler.gif" alt="Animated comparison showing flow matching taking multiple small solver steps while Drift-VLA samples in one step.">
           <figcaption class="explainer-caption top-animation-caption">
-            <strong>Same SmolVLA backbone, same data.</strong>
-            Flow matching spends 10 expert passes per action chunk. Drift-VLA uses
-            one; batched KeyStone selection lifts the best result to 92.3 ±0.6%.
+            <strong>Same backbone, same data — only the objective changes.</strong>
+            Flow matching spends 10 expert passes per action chunk; Drift uses one,
+            and matches FM&rsquo;s success on both SmolVLA and Pi0.5 across all four
+            LIBERO suites.
           </figcaption>
         </figure>
         <div class="hero-metrics" aria-label="Headline metrics">
           <div class="hero-metric">
+            <span class="metric-kicker">Expert passes / chunk</span>
             <strong>1</strong>
-            <span>NFE inference</span>
+            <span class="metric-compare">FM: 10</span>
           </div>
           <div class="hero-metric">
-            <strong>90.2%</strong>
-            <span>base success</span>
+            <span class="metric-kicker">SmolVLA · LIBERO avg</span>
+            <strong>87.6</strong>
+            <span class="metric-compare">FM: 84.9</span>
           </div>
           <div class="hero-metric">
-            <strong>92.3%</strong>
-            <span>best ±0.6</span>
+            <span class="metric-kicker">Pi0.5 · LIBERO avg</span>
+            <strong>96.3</strong>
+            <span class="metric-compare">FM: 93.1</span>
           </div>
           <div class="hero-metric">
+            <span class="metric-kicker">Decode speed</span>
             <strong>4.4×</strong>
-            <span>lower latency</span>
+            <span class="metric-compare">vs 10-step FM</span>
           </div>
         </div>
 
@@ -1177,18 +1220,88 @@
   <!-- ==================== S2 · TL;DR ==================== -->
   <section class="section tight">
     <div class="container is-max-desktop">
-      <h2 class="title is-3 has-text-centered">At a Glance</h2>
+      <h2 class="title is-3 has-text-centered">TL;DR</h2>
       <div class="tldr-card">
         <p>
-          <span class="w-drift">Drift-VLA</span> keeps SmolVLA&rsquo;s backbone, data,
-          observations, and action chunks fixed. It replaces
-          <span class="w-fm">iterative flow matching</span> with
-          <span class="w-drift">one-step drifting</span> in the action expert.
-          The winning recipe is <span class="w-key">action-dimension drift + KeyStone</span>:
-          <strong>92.3 ±0.6%</strong> LIBERO-Spatial success at
-          <strong>53.5&nbsp;ms/chunk</strong>.
+          Drift-VLA trains the action expert of a VLA policy with a
+          <span class="w-drift">one-step drifting objective</span> instead of
+          <span class="w-fm">iterative flow matching</span>. Same backbone, same data,
+          <span class="w-key">no distillation</span>: a single expert pass
+          <span class="w-drift">matches the multi-step sampler</span>, verified in
+          <span class="w-key">simulation and on a real robot</span> across
+          <span class="w-key">different VLA backbones</span>, with
+          <span class="w-speed">faster, more reactive inference</span>.
         </p>
       </div>
+
+      <div class="table-container" style="margin-top:1.5rem;">
+        <table class="table results-table is-striped is-hoverable">
+          <thead>
+            <tr>
+              <th>Backbone · method</th>
+              <th class="num">NFE</th>
+              <th class="num">Spatial</th>
+              <th class="num">Object</th>
+              <th class="num">Goal</th>
+              <th class="num">Long</th>
+              <th class="num"><span class="th-main">Avg</span><span class="th-sub">4 suites</span></th>
+              <th class="num"><span class="th-main">Latency</span><span class="th-sub">ms / chunk</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="chip fm">SmolVLA-FM (10 steps)</span></td>
+              <td class="num">10</td>
+              <td class="num">94.1</td>
+              <td class="num">83.9</td>
+              <td class="num">87.5</td>
+              <td class="num">74.0</td>
+              <td class="num">84.9</td>
+              <td class="num">222.6</td>
+            </tr>
+            <tr>
+              <td><span class="chip drift"><strong>Drift-VLA (ours)</strong></span></td>
+              <td class="num"><strong>1</strong></td>
+              <td class="num"><strong>94.4</strong></td>
+              <td class="num"><strong>92.5</strong></td>
+              <td class="num"><strong>89.2</strong></td>
+              <td class="num"><strong>74.3</strong></td>
+              <td class="num"><strong>87.6</strong></td>
+              <td class="num"><strong>50.6</strong></td>
+            </tr>
+            <tr>
+              <td><span class="chip fm">Pi0.5-FM (10 steps)</span></td>
+              <td class="num">10</td>
+              <td class="num">96.2</td>
+              <td class="num">96.8</td>
+              <td class="num">92.6</td>
+              <td class="num">86.7</td>
+              <td class="num">93.1</td>
+              <td class="num">259.8</td>
+            </tr>
+            <tr class="best-row">
+              <td><span class="chip drift"><strong>Drift-Pi0.5 (ours)</strong></span></td>
+              <td class="num"><strong>1</strong></td>
+              <td class="num"><strong>98.3</strong></td>
+              <td class="num"><strong>98.1</strong></td>
+              <td class="num"><strong>95.6</strong></td>
+              <td class="num"><strong>93.1</strong></td>
+              <td class="num"><strong>96.3</strong></td>
+              <td class="num"><strong>85.6</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="result-takeaway">
+        LIBERO, 50 episodes/task, n=3 eval seeds; best full-finetune arm per method, each
+        model at its native replan cadence. Drift&rsquo;s <span class="w-drift">Object win on
+        SmolVLA (+8.6)</span> and <span class="w-drift">Long win on Pi0.5 (+6.4)</span> are
+        the seed-robust gaps; everything else is a tie — at one-tenth the decode passes.
+      </p>
+
+      <figure class="explainer-panel" style="margin-top:1rem;">
+        <img src="static/images/b1_suites.svg" alt="Grouped bar chart of success rates for FM and Drift on four LIBERO suites plus the average, for SmolVLA and Pi0.5.">
+      </figure>
     </div>
   </section>
 
@@ -1199,21 +1312,25 @@
         <div class="column is-four-fifths">
           <h2 class="title is-3 has-text-centered">Why one-step matters</h2>
           <p class="section-lead">
-            Iterative VLA samplers spend <strong>K expert passes</strong> per action chunk.
-            Drift-VLA asks whether one pass can keep FM-level success.
+            Closed-loop control means replanning: decode a fresh 50-action chunk from the
+            latest observation, execute only its first steps, repeat. Every replan pays the
+            full decode — <span class="w-fm">10 expert passes</span> for flow matching,
+            <span class="w-drift">one</span> for drifting — so decode latency bounds how
+            tightly the policy can stay in the loop.
           </p>
-          <div class="figure-block">
-            <img src="static/images/a3_latency_breakdown.svg" alt="Stacked latency bars per method: shared VLM prefix cost plus action-expert cost times K.">
+          <div class="figure-block wide">
+            <img src="static/images/a3_latency_breakdown.svg" alt="Stacked latency bars for FM and Drift on SmolVLA and Pi0.5: shared VLM prefix cost plus action-expert passes.">
             <p class="figure-caption">
-              The shared VLM prefix is paid once; the repeated action-expert calls are
-              what one-step drifting removes.
+              Where the decode time goes: both methods pay the VLM prefix once; the repeated
+              action-expert calls are what drifting removes. What latency costs is
+              <strong>blind execution</strong> — actions consumed from the old chunk while
+              the new one decodes. At LIBERO&rsquo;s 10&nbsp;Hz control rate that is
+              <span class="w-fm">~2 stale actions per replan for 10-step FM</span> vs
+              <span class="w-drift">under one for Drift</span>; at a real robot&rsquo;s
+              30&nbsp;Hz (LeKiwi-class collection rate) it grows to
+              <span class="w-fm">~7</span> vs <span class="w-drift">~1.5</span>.
             </p>
           </div>
-          <p class="section-lead" style="margin-top:1rem;">
-            Base Drift-VLA runs at <span class="w-speed">50.6&nbsp;ms/chunk</span>;
-            FM-10 runs at 232.9&nbsp;ms/chunk. That headroom pays for
-            <span class="w-key">KeyStone</span> while staying at 53.5&nbsp;ms/chunk.
-          </p>
         </div>
       </div>
     </div>
@@ -1356,12 +1473,204 @@
         <div class="column is-four-fifths">
           <h2 class="title is-3 has-text-centered">Results</h2>
 
+          <h3 class="title is-4 has-text-centered" id="smolvla-results">SmolVLA (450M)</h3>
+          <p class="section-lead">
+            Two training regimes, same verdict: one-step Drift ties ten-step FM on
+            LIBERO-Spatial, and leads on the 4-suite average.
+          </p>
+          <div class="result-summary" aria-label="Speed and success summary">
+            <div class="result-summary-card">
+              <h3>Expert-only (frozen VLM)</h3>
+              <dl>
+                <div><dt>Drift (1 NFE)</dt><dd>90.8 ±2.2%</dd></div>
+                <div><dt>FM (10 NFE)</dt><dd>90.2 ±2.2%</dd></div>
+                <div><dt>Verdict</dt><dd>tie</dd></div>
+              </dl>
+            </div>
+            <div class="result-summary-card">
+              <h3>Full finetune</h3>
+              <dl>
+                <div><dt>Drift (1 NFE)</dt><dd>94.2 ±2.3%</dd></div>
+                <div><dt>FM (10 NFE)</dt><dd>94.3 ±0.8%</dd></div>
+                <div><dt>Verdict</dt><dd>tie, at 1/10th the passes</dd></div>
+              </dl>
+            </div>
+            <div class="result-summary-card highlight">
+              <h3>Full finetune + KeyStone</h3>
+              <dl>
+                <div><dt>Success</dt><dd>96.8 ±1.3%</dd></div>
+                <div><dt>Sampling</dt><dd>8×1, one batched pass</dd></div>
+                <div><dt>Extra cost</dt><dd>≈ +1 expert pass</dd></div>
+              </dl>
+            </div>
+          </div>
+          <p class="result-takeaway">
+            <span class="w-drift">One-step Drift ties ten-step FM</span> in both training
+            regimes (LIBERO-Spatial, 3 seeds) while decoding
+            <span class="w-speed">4.4× faster</span>. <span class="w-key">KeyStone</span>
+            adds a small, within-noise lift for roughly one extra expert pass.
+          </p>
+
+          <div class="table-container" style="margin-top:1.5rem;">
+            <table class="table results-table is-striped is-hoverable">
+              <thead>
+                <tr>
+                  <th>SmolVLA (450M) · all four suites</th>
+                  <th class="num">NFE</th>
+                  <th class="num">Spatial</th>
+                  <th class="num">Object</th>
+                  <th class="num">Goal</th>
+                  <th class="num">Long</th>
+                  <th class="num"><span class="th-main">Avg</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="chip fm">FM (10 steps)</span></td>
+                  <td class="num">10</td>
+                  <td class="num">94.1 ±0.2</td>
+                  <td class="num">83.9 ±1.1</td>
+                  <td class="num">87.5 ±0.6</td>
+                  <td class="num">74.0 ±1.6</td>
+                  <td class="num">84.9 ±0.5</td>
+                </tr>
+                <tr>
+                  <td><span class="chip drift"><strong>Drift-VLA</strong></span></td>
+                  <td class="num"><strong>1</strong></td>
+                  <td class="num"><strong>94.4 ±1.0</strong></td>
+                  <td class="num"><strong>92.5 ±0.7</strong></td>
+                  <td class="num"><strong>89.2 ±0.8</strong></td>
+                  <td class="num"><strong>74.3 ±0.7</strong></td>
+                  <td class="num"><strong>87.6 ±0.2</strong></td>
+                </tr>
+                <tr class="best-row">
+                  <td><span class="chip drift"><strong>Drift-VLA + KeyStone</strong></span></td>
+                  <td class="num">8×1</td>
+                  <td class="num"><strong>96.1 ±0.2</strong></td>
+                  <td class="num"><strong>93.6 ±0.3</strong></td>
+                  <td class="num">89.3 ±0.8</td>
+                  <td class="num">72.7 ±1.5</td>
+                  <td class="num"><strong>87.9 ±0.6</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="figure-caption" style="margin-top:0.5rem;">
+            Best full-finetune arm per method; 50 episodes/task × 3 eval seeds, closed-loop
+            replanning. Drift decodes at 50.6 vs 222.6&nbsp;ms/chunk. The
+            <span class="w-drift">Object gap (+8.6)</span> is seed-robust; KeyStone helps
+            the short-horizon suites but not Long.
+          </p>
+
+          <h3 class="title is-4 has-text-centered" id="pi05" style="margin-top:2.5rem;">Same recipe on Pi0.5</h3>
+          <p class="section-lead">
+            The identical drifting objective, hyperparameters included, ports to
+            <span class="w-key">Pi0.5 (3.3B)</span> as a three-file patch — and the absolute
+            numbers get stronger: <span class="w-drift">98.3 on Spatial, 96.3 across all
+            four suites at 1&nbsp;NFE</span>, winning every suite against 10-step FM.
+          </p>
+          <div class="table-container" style="margin-top:1.25rem;">
+            <table class="table results-table is-striped is-hoverable">
+              <thead>
+                <tr>
+                  <th>Pi0.5 (3.3B) · all four suites</th>
+                  <th class="num">NFE</th>
+                  <th class="num">Spatial</th>
+                  <th class="num">Object</th>
+                  <th class="num">Goal</th>
+                  <th class="num">Long</th>
+                  <th class="num"><span class="th-main">Avg</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="chip fm">FM (10 steps)</span></td>
+                  <td class="num">10</td>
+                  <td class="num">96.2 ±2.0</td>
+                  <td class="num">96.8 ±0.4</td>
+                  <td class="num">92.6 ±0.3</td>
+                  <td class="num">86.7 ±1.4</td>
+                  <td class="num">93.1 ±0.5</td>
+                </tr>
+                <tr class="best-row">
+                  <td><span class="chip drift"><strong>Drift-Pi0.5</strong></span></td>
+                  <td class="num"><strong>1</strong></td>
+                  <td class="num"><strong>98.3 ±0.3</strong></td>
+                  <td class="num"><strong>98.1 ±0.9</strong></td>
+                  <td class="num"><strong>95.6 ±0.8</strong></td>
+                  <td class="num"><strong>93.1 ±0.6</strong></td>
+                  <td class="num"><strong>96.3 ±0.1</strong></td>
+                </tr>
+                <tr>
+                  <td><span class="chip drift">Drift-Pi0.5 + KeyStone</span></td>
+                  <td class="num">8×1</td>
+                  <td class="num">97.0 ±0.9</td>
+                  <td class="num"><strong>98.2 ±0.5</strong></td>
+                  <td class="num"><strong>95.7 ±1.6</strong></td>
+                  <td class="num"><strong>94.9 ±1.0</strong></td>
+                  <td class="num"><strong>96.5</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="figure-caption" style="margin-top:0.5rem;">
+            Full finetune @10k; 50 episodes/task × 3 eval seeds, Pi0.5-native cadence.
+            Drift wins every suite, and the gap <span class="w-drift">grows with task
+            difficulty</span> (Object +1.3 → Long +6.4). Decode: 85.6 vs 259.8&nbsp;ms/chunk.
+          </p>
+          <p class="section-lead" style="margin-top:1.5rem;">
+            The edge also <span class="w-drift">grows as adaptation capacity shrinks</span> —
+            the less the backbone can adapt, the more the one-step objective matters:
+          </p>
+          <div class="figure-block wide">
+            <img src="static/images/c1_capacity_arc.svg" alt="Line chart on Pi0.5: Drift versus FM success across three training regimes; the gap grows from +2.2 at full finetune to +11.2 with a frozen backbone at 3k steps.">
+            <p class="figure-caption">
+              LIBERO-Spatial, n=3 eval seeds, same LIBERO-adapted VLM. FM needs full
+              finetuning to approach Drift; expert-only FM falls behind fast.
+            </p>
+          </div>
+          <div class="table-container" style="margin-top:1.25rem;">
+            <table class="table results-table is-striped is-hoverable">
+              <thead>
+                <tr>
+                  <th>Pi0.5, 4-suite average</th>
+                  <th class="num">Full finetune</th>
+                  <th class="num">Expert-only (frozen 3B VLM)</th>
+                  <th class="num">Δ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="best-row">
+                  <td><span class="chip drift"><strong>Drift (1 NFE)</strong></span></td>
+                  <td class="num"><strong>96.3 ±0.1</strong></td>
+                  <td class="num"><strong>96.3 ±0.5</strong></td>
+                  <td class="num"><strong>±0.0</strong></td>
+                </tr>
+                <tr>
+                  <td><span class="chip fm">FM (10 NFE)</span></td>
+                  <td class="num">93.1 ±0.5</td>
+                  <td class="num">85.7 ±0.6</td>
+                  <td class="num">−7.4</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-footnote">
+            One training seed per arm (evaluations are 3-seed); matched budgets, objective
+            flags the only difference.
+          </p>
+
+          <h3 class="title is-4 has-text-centered" id="keystone" style="margin-top:2.5rem;">KeyStone: test-time selection</h3>
+          <p class="section-lead">
+            One-step sampling makes best-of-K nearly free: K chunks ride one batched expert
+            pass off the shared prefix. KeyStone executes the consensus candidate.
+          </p>
           <div class="best-result-banner" aria-label="Best observed result">
-            <div class="best-result-score"><span>92.3%</span><small>±0.6</small></div>
+            <div class="best-result-score"><span>96.8%</span><small>±1.3</small></div>
             <div class="best-result-copy">
-              <strong>Best observed:</strong> <span class="w-key">action-dimension Drift-VLA + KeyStone</span>.
-              It reaches 92.3 ±0.6% at 53.5&nbsp;ms/chunk; the base one-step model
-              is 90.2 ±1.3% at 50.6&nbsp;ms/chunk.
+              <strong>Best SmolVLA result:</strong> <span class="w-key">full-finetune Drift-VLA + KeyStone</span>
+              on LIBERO-Spatial, at roughly one extra expert pass over the base
+              one-step model (50.6&nbsp;ms/chunk).
             </div>
           </div>
 
@@ -1397,77 +1706,6 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <div class="result-summary" aria-label="Speed and success summary">
-            <div class="result-summary-card">
-              <h3>SmolVLA-FM (10 steps)</h3>
-              <dl>
-                <div><dt>Success</dt><dd>88.0 ±1.5%</dd></div>
-                <div><dt>Latency</dt><dd>232.9 ms</dd></div>
-                <div><dt>NFE</dt><dd>10</dd></div>
-              </dl>
-            </div>
-            <div class="result-summary-card">
-              <h3>Drift-VLA</h3>
-              <dl>
-                <div><dt>Success</dt><dd>90.2 ±1.3%</dd></div>
-                <div><dt>Latency</dt><dd>50.6 ms</dd></div>
-                <div><dt>NFE</dt><dd>1</dd></div>
-              </dl>
-            </div>
-            <div class="result-summary-card highlight">
-              <h3>Drift-VLA + KeyStone</h3>
-              <dl>
-                <div><dt>Success</dt><dd>92.3 ±0.6%</dd></div>
-                <div><dt>Latency</dt><dd>53.5 ms</dd></div>
-                <div><dt>Sampling</dt><dd>8×1</dd></div>
-              </dl>
-            </div>
-          </div>
-          <p class="result-takeaway">
-            <span class="w-drift">Base Drift-VLA</span> already exceeds FM-10 while
-            running <span class="w-speed">4.6× faster</span>. KeyStone spends a small
-            part of that headroom and still runs <span class="w-speed">4.4× faster</span>.
-          </p>
-
-          <div class="table-container" style="margin-top:1.5rem;">
-            <table class="table results-table is-striped is-hoverable">
-              <thead>
-                <tr>
-                  <th>Method</th>
-                  <th class="num">NFE</th>
-                  <th class="num"><span class="th-main">Latency</span><span class="th-sub">ms / chunk</span></th>
-                  <th class="num"><span class="th-main">Success (%)</span><span class="th-sub">LIBERO-Spatial · 200 eps × 3</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><span class="chip fm">SmolVLA-FM (10 steps)</span></td>
-                  <td class="num">10</td>
-                  <td class="num">232.9</td>
-                  <td class="num"><strong>88.0 ± 1.5</strong></td>
-                </tr>
-                <tr>
-                  <td><span class="chip fm">SmolVLA-FM (1 step)</span></td>
-                  <td class="num">1</td>
-                  <td class="num"><strong>50.1</strong></td>
-                  <td class="num">84.0 ± 2.0</td>
-                </tr>
-                <tr>
-                  <td><span class="chip drift"><strong>Drift-VLA (action-dimension drift)</strong></span></td>
-                  <td class="num"><strong>1</strong></td>
-                  <td class="num">50.6</td>
-                  <td class="num"><strong>90.2 ± 1.3</strong></td>
-                </tr>
-                <tr class="best-row">
-                  <td><span class="chip drift"><strong>Drift-VLA (action-dimension drift) + KeyStone</strong></span><span class="best-badge">Best observed</span></td>
-                  <td class="num">8×1</td>
-                  <td class="num"><strong>53.5</strong></td>
-                  <td class="num"><strong>92.3 ± 0.6</strong></td>
-                </tr>
-              </tbody>
-            </table>
           </div>
 
           <h3 class="title is-4 has-text-centered" id="rollouts" style="margin-top:2rem;">Real-World Shopping Rollouts</h3>
@@ -1565,33 +1803,30 @@
             </div>
           </div>
 
-          <h3 class="title is-4 has-text-centered" id="ablation" style="margin-top:2rem;">Drift Grouping Ablation</h3>
+          <h3 class="title is-4 has-text-centered" id="ablation" style="margin-top:2rem;">What makes Drift work</h3>
           <p class="section-lead">
-            <span class="w-key">Action-dimension drift</span> is the strongest and most
-            stable grouping: match each action dimension&rsquo;s chunk trajectory separately.
+            The two ablations that decide the recipe. First, the <span class="w-key">drift
+            grouping</span> — what owns a distance ruler in the drift kernel:
           </p>
           <div class="table-container">
             <table class="table results-table ablation-table">
               <thead>
                 <tr>
-                  <th>Rank</th>
                   <th>Drift grouping</th>
-                  <th class="num">20k SR (%)</th>
-                  <th class="num">30k SR (%)</th>
+                  <th class="num">SR @20k (%)</th>
+                  <th class="num">SR @30k (%)</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="best-row">
-                  <td><span class="rank-chip">1</span></td>
                   <td>
                     <div class="variant-name">Action-dimension drift</div>
-                    <span class="variant-detail">one matching unit per action dimension</span>
+                    <span class="variant-detail">one matching unit per action dimension&rsquo;s chunk trajectory</span>
                   </td>
                   <td class="num"><strong>89.0 ±1.4</strong></td>
                   <td class="num"><strong>90.2 ±1.3</strong></td>
                 </tr>
                 <tr>
-                  <td><span class="rank-chip">2</span></td>
                   <td>
                     <div class="variant-name">Chunk-level drift</div>
                     <span class="variant-detail">joint matching over the complete action chunk</span>
@@ -1600,46 +1835,67 @@
                   <td class="num">77.8</td>
                 </tr>
                 <tr>
-                  <td><span class="rank-chip">3</span></td>
                   <td>
-                    <div class="variant-name">Timestep drift (8 samples)</div>
+                    <div class="variant-name">Timestep drift</div>
                     <span class="variant-detail">per-timestep matching with 8 sibling samples</span>
                   </td>
-                  <td class="num">78.8</td>
-                  <td class="num">81.3</td>
+                  <td class="num">78.5&thinsp;°</td>
+                  <td class="num">79.0&thinsp;°</td>
                 </tr>
                 <tr>
-                  <td><span class="rank-chip">4</span></td>
                   <td>
-                    <div class="variant-name">Timestep drift (16 samples)</div>
-                    <span class="variant-detail">same grouping with more sibling samples</span>
+                    <div class="variant-name w-fm">FM baseline (10 steps, reference)</div>
+                    <span class="variant-detail">stock flow matching, same setup</span>
                   </td>
-                  <td class="num">76.5</td>
-                  <td class="num">79.0</td>
-                </tr>
-                <tr>
-                  <td><span class="rank-chip">5</span></td>
-                  <td>
-                    <div class="variant-name">Timestep drift (4 samples)</div>
-                    <span class="variant-detail">same grouping with fewer sibling samples</span>
-                  </td>
-                  <td class="num">78.8</td>
-                  <td class="num">78.8</td>
-                </tr>
-                <tr>
-                  <td><span class="rank-chip">6</span></td>
-                  <td>
-                    <div class="variant-name">Shared-temperature drift</div>
-                    <span class="variant-detail">one temperature shared across dimensions</span>
-                  </td>
-                  <td class="num">70.0</td>
-                  <td class="num">78.0</td>
+                  <td class="num">89.5 ±2.6</td>
+                  <td class="num">90.2 ±2.2</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <p class="table-footnote">
-            Same SmolVLA setup and data; only the drift grouping changes.
+            SmolVLA expert-only, LIBERO-Spatial, 3 eval seeds (° single seed). Action
+            dimensions carry heterogeneous units (position vs gripper); giving each its own
+            distance scale is what closes the gap to FM — only action-dimension drift
+            reaches it at 1&nbsp;NFE.
+          </p>
+
+          <p class="section-lead" style="margin-top:1.5rem;">
+            Second, numerical precision: the drift field is built from pairwise distances,
+            and bf16 autocast silently corrupts it. Computing the drift goal in
+            <span class="w-key">fp32</span> (one guard, no speed cost) is worth up to
+            <span class="w-drift">+8.2 points</span>:
+          </p>
+          <div class="table-container">
+            <table class="table results-table ablation-table">
+              <thead>
+                <tr>
+                  <th>Drift grouping</th>
+                  <th class="num">bf16 goal (%)</th>
+                  <th class="num">fp32 goal (%)</th>
+                  <th class="num">Δ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="variant-name">Chunk-level drift @20k</div></td>
+                  <td class="num">78.3</td>
+                  <td class="num"><strong>86.5</strong></td>
+                  <td class="num"><strong>+8.2</strong></td>
+                </tr>
+                <tr>
+                  <td><div class="variant-name">Action-dimension drift @30k</div></td>
+                  <td class="num">89.0&thinsp;°</td>
+                  <td class="num"><strong>90.2</strong></td>
+                  <td class="num">+1.2</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-footnote">
+            Identical code otherwise; 3 eval seeds (° single seed). The remaining ablations —
+            sample count G, temperatures, 14 kernel variants (none beats the canonical
+            kernel), KeyStone settings, replan cadence — are in the paper.
           </p>
 
           <h3 class="title is-4 has-text-centered" id="libero-rollouts" style="margin-top:2rem;">LIBERO Rollouts</h3>
@@ -1757,6 +2013,14 @@
         <div class="reference-item">
           <a href="https://arxiv.org/abs/2605.08638" target="_blank" rel="noopener noreferrer">Geometry Guided Self-Consistency for Physical AI</a>
           <span>Dai et al., arXiv 2026. Introduces KeyStone.</span>
+        </div>
+        <div class="reference-item">
+          <a href="https://arxiv.org/abs/2504.16054" target="_blank" rel="noopener noreferrer">&pi;0.5: a Vision-Language-Action Model with Open-World Generalization</a>
+          <span>Physical Intelligence, arXiv 2025.</span>
+        </div>
+        <div class="reference-item">
+          <a href="https://arxiv.org/abs/2306.03310" target="_blank" rel="noopener noreferrer">LIBERO: Benchmarking Knowledge Transfer for Lifelong Robot Learning</a>
+          <span>Liu et al., NeurIPS 2023.</span>
         </div>
       </div>
     </div>

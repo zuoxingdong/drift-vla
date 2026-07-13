@@ -35,12 +35,16 @@ def center_text(draw, y, text, size, fill, bold=False):
     draw.text((x, int(y * SCALE)), text, font=f, fill=fill)
 
 
+TINT = {"#2a78d6": "#eef4fd", "#1baf7a": "#e9f7f1"}
+
+
 def card(draw, x, y, w, h, title, value, note, accent):
-    draw.rounded_rectangle(xy((x, y, x + w, y + h)), radius=18 * SCALE, fill="white", outline=accent, width=2 * SCALE)
-    draw.ellipse(xy((x + 27, y + 29, x + 41, y + 43)), fill=accent)
-    draw.text(xy((x + 54, y + 24)), title, font=font(22, True), fill=INK)
-    draw.text(xy((x + 28, y + 77)), value, font=font(37, True), fill=accent)
-    draw.text(xy((x + 28, y + 122)), note, font=font(19), fill=INK_2)
+    draw.rounded_rectangle(xy((x, y, x + w, y + h)), radius=18 * SCALE,
+                           fill=TINT.get(accent, "white"), outline=accent, width=2 * SCALE)
+    draw.rounded_rectangle(xy((x + 24, y + 24, x + 74, y + 30)), radius=3 * SCALE, fill=accent)
+    draw.text(xy((x + 24, y + 44)), title, font=font(21, True), fill=INK)
+    draw.text(xy((x + 24, y + 84)), value, font=font(40, True), fill=accent)
+    draw.text(xy((x + 24, y + 136)), note, font=font(17), fill=INK_2)
 
 
 img = Image.new("RGB", (W, H), "white")
@@ -48,15 +52,15 @@ draw = ImageDraw.Draw(img)
 
 draw.rounded_rectangle(xy((54, 50, 1146, 580)), radius=28 * SCALE, fill=PANEL, outline=HAIRLINE, width=1 * SCALE)
 center_text(draw, 83, "Drift-VLA", 54, INK, True)
-center_text(draw, 153, "One-step action generation with action-dimension drifting", 27, BLUE, True)
-center_text(draw, 202, "SmolVLA backbone, 1-NFE inference, KeyStone self-consistency", 22, INK_2)
+center_text(draw, 153, "One-step action generation for VLA policies", 27, BLUE, True)
+center_text(draw, 204, "Matches 10-step flow matching on two backbones, all 4 LIBERO suites — avg success:", 22, INK_2)
 
-card(draw, 115, 285, 290, 170, "Best success", "92.3 ±0.6%", "LIBERO-Spatial", BLUE)
-card(draw, 455, 285, 290, 170, "Latency", "53.5 ms", "per action chunk", AQUA)
-card(draw, 795, 285, 290, 170, "Real robot", "LeKiwi", "shopping rollouts", BLUE)
+card(draw, 100, 275, 310, 185, "SmolVLA (450M)", "87.6 vs 84.9", "Drift (1 step) vs FM (10 steps)", BLUE)
+card(draw, 445, 275, 310, 185, "Pi0.5 (3.3B)", "96.3 vs 93.1", "Drift (1 step) vs FM (10 steps)", BLUE)
+card(draw, 790, 275, 310, 185, "Faster decode", "up to 4.4×", "one step vs ten, per chunk", AQUA)
 
 draw.rounded_rectangle(xy((390, 500, 810, 506)), radius=3 * SCALE, fill=AQUA)
-center_text(draw, 525, "Drift-VLA + KeyStone keeps one-step speed while improving robustness.", 21, INK, True)
+center_text(draw, 525, "Deploys on a real robot (LeKiwi 9/10) at one-step speed.", 21, INK, True)
 
 img = img.resize((1200, 630), Image.Resampling.LANCZOS)
 img.save(IMAGES / "og_preview.png", quality=95)
