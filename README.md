@@ -9,7 +9,7 @@ Live page: https://zuoxingdong.github.io/drift-vla/
 
 Public paper PDF: `static/papers/drift-vla.pdf`.
 
-Public code branch: https://github.com/zuoxingdong/smolvla-drift/tree/smolvla-drift
+Code (LeRobot plugin policy): https://github.com/zuoxingdong/lerobot_policy_smolvla_drift
 
 Internal paper source and review notes are intentionally not included in this
 website repo.
