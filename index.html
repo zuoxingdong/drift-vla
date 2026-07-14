@@ -1677,11 +1677,14 @@
             pass off the shared prefix. KeyStone executes the consensus candidate.
           </p>
           <div class="best-result-banner" aria-label="Best observed result">
-            <div class="best-result-score"><span>96.8%</span><small>±1.3</small></div>
+            <div class="best-result-score"><span>96.5</span><small>4-suite avg</small></div>
             <div class="best-result-copy">
-              <strong>Best SmolVLA result:</strong> <span class="w-key">full-finetune Drift-VLA + KeyStone</span>
-              on LIBERO-Spatial, at roughly one extra expert pass over the base
-              one-step model (50.6&nbsp;ms/chunk).
+              <strong>Pi0.5 + KeyStone across all four LIBERO suites</strong> at
+              <span class="w-speed">zero added latency</span> (85.7 vs 85.6&nbsp;ms/chunk —
+              the K=8 candidates ride one batched expert pass). The lift lands where there is
+              headroom: <span class="w-key">Long 93.1 → 94.9</span>, the hardest suite,
+              +8.2 over 10-step FM. On SmolVLA-Spatial the same selector reaches
+              <span class="w-key">96.8 ±1.3</span>.
             </div>
           </div>
 
