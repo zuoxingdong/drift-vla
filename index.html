@@ -1161,8 +1161,8 @@
           </div>
           <div class="hero-metric">
             <span class="metric-kicker">Pi0.5 · LIBERO avg</span>
-            <strong>96.3</strong>
-            <span class="metric-compare">FM: 93.1</span>
+            <strong>97.4</strong>
+            <span class="metric-compare">FM: 96.9</span>
           </div>
           <div class="hero-metric">
             <span class="metric-kicker">Faster decoding</span>
@@ -1277,31 +1277,31 @@
             <tr>
               <td><span class="chip fm">Pi0.5-FM (10 steps)</span></td>
               <td class="num">10</td>
-              <td class="num">96.2</td>
-              <td class="num">96.8</td>
-              <td class="num">92.6</td>
-              <td class="num">86.7</td>
-              <td class="num">93.1</td>
+              <td class="num">98.5</td>
+              <td class="num">99.1</td>
+              <td class="num">96.7</td>
+              <td class="num">93.3</td>
+              <td class="num">96.9</td>
               <td class="num">259.8</td>
             </tr>
             <tr class="best-row">
               <td><span class="chip drift"><strong>Drift-Pi0.5 (ours)</strong></span></td>
               <td class="num"><strong>1</strong></td>
-              <td class="num"><strong>98.3</strong></td>
+              <td class="num">97.9</td>
+              <td class="num">99.0</td>
               <td class="num"><strong>98.1</strong></td>
-              <td class="num"><strong>95.6</strong></td>
-              <td class="num"><strong>93.1</strong></td>
-              <td class="num"><strong>96.3</strong></td>
+              <td class="num"><strong>94.7</strong></td>
+              <td class="num"><strong>97.4</strong></td>
               <td class="num"><strong>85.6</strong></td>
             </tr>
           </tbody>
         </table>
       </div>
       <p class="result-takeaway">
-        LIBERO, 50 episodes/task, n=3 eval seeds; best full-finetune arm per method, each
+        LIBERO, 50 episodes/task, n=3 eval seeds; full-finetune @100k, each
         model at its native replan cadence. Drift&rsquo;s <span class="w-drift">Object win on
-        SmolVLA (+8.6)</span> and <span class="w-drift">Long win on Pi0.5 (+6.4)</span> are
-        the seed-robust gaps; everything else is a tie — at one-tenth the decode passes.
+        SmolVLA (+8.6)</span> and <span class="w-drift">Goal/Long edge on Pi0.5 (+1.4 each)</span>
+        are the gaps; the near-saturated suites tie — at one-tenth the decode passes.
       </p>
 
     </div>
@@ -1478,9 +1478,9 @@
           <figure class="explainer-panel" style="margin-bottom:1.5rem;">
             <img src="static/images/b1_suites.svg" alt="Grouped bar chart of success rates for FM and Drift on four LIBERO suites plus the average, for SmolVLA and Pi0.5.">
             <figcaption class="explainer-caption">
-              The picture in one figure: <span class="w-drift">Drift at 1 NFE</span> tracks or
-              beats <span class="w-fm">FM at 10 NFE</span> on every suite, on both backbones.
-              Details below.
+              The picture in one figure: <span class="w-drift">Drift at 1 NFE</span> matches or
+              beats <span class="w-fm">FM at 10 NFE</span> on the four-suite average on both
+              backbones — winning every SmolVLA suite and the harder Pi0.5 suites. Details below.
             </figcaption>
           </figure>
 
@@ -1577,8 +1577,10 @@
           <p class="section-lead">
             The identical drifting objective, hyperparameters included, ports to
             <span class="w-key">Pi0.5 (3.3B)</span> as a three-file patch — and the absolute
-            numbers get stronger: <span class="w-drift">98.3 on Spatial, 96.3 across all
-            four suites at 1&nbsp;NFE</span>, winning every suite against 10-step FM.
+            numbers get stronger: <span class="w-drift">97.4 across all four suites at
+            1&nbsp;NFE</span>, ahead of 10-step FM (96.9), with the edge concentrated on the
+            harder Goal and Long suites. Drift stays ahead at every training budget across the
+            25k&ndash;100k sweep (peak 97.7 at 75k) and reaches FM&rsquo;s 100k quality by ~30k steps.
           </p>
           <div class="table-container" style="margin-top:1.25rem;">
             <table class="table results-table is-striped is-hoverable">
@@ -1597,41 +1599,43 @@
                 <tr>
                   <td><span class="chip fm">FM (10 steps)</span></td>
                   <td class="num">10</td>
-                  <td class="num">96.2 ±2.0</td>
-                  <td class="num">96.8 ±0.4</td>
-                  <td class="num">92.6 ±0.3</td>
-                  <td class="num">86.7 ±1.4</td>
-                  <td class="num">93.1 ±0.5</td>
+                  <td class="num"><strong>98.5 ±0.3</strong></td>
+                  <td class="num">99.1 ±0.6</td>
+                  <td class="num">96.7 ±0.5</td>
+                  <td class="num">93.3 ±0.7</td>
+                  <td class="num">96.9 ±0.1</td>
                 </tr>
                 <tr class="best-row">
                   <td><span class="chip drift"><strong>Drift-Pi0.5</strong></span></td>
                   <td class="num"><strong>1</strong></td>
-                  <td class="num"><strong>98.3 ±0.3</strong></td>
-                  <td class="num"><strong>98.1 ±0.9</strong></td>
-                  <td class="num"><strong>95.6 ±0.8</strong></td>
-                  <td class="num"><strong>93.1 ±0.6</strong></td>
-                  <td class="num"><strong>96.3 ±0.1</strong></td>
+                  <td class="num">97.9 ±1.0</td>
+                  <td class="num">99.0 ±0.2</td>
+                  <td class="num"><strong>98.1 ±0.4</strong></td>
+                  <td class="num"><strong>94.7 ±1.8</strong></td>
+                  <td class="num"><strong>97.4 ±0.4</strong></td>
                 </tr>
                 <tr>
                   <td><span class="chip drift">Drift-Pi0.5 + KeyStone</span></td>
                   <td class="num">8×1</td>
-                  <td class="num">97.0 ±0.9</td>
-                  <td class="num"><strong>98.2 ±0.5</strong></td>
-                  <td class="num"><strong>95.7 ±1.6</strong></td>
-                  <td class="num"><strong>94.9 ±1.0</strong></td>
-                  <td class="num"><strong>96.5</strong></td>
+                  <td class="num">98.3 ±0.6</td>
+                  <td class="num"><strong>99.7 ±0.2</strong></td>
+                  <td class="num">97.1 ±0.9</td>
+                  <td class="num"><strong>95.4 ±0.4</strong></td>
+                  <td class="num"><strong>97.6</strong></td>
                 </tr>
               </tbody>
             </table>
           </div>
           <p class="figure-caption" style="margin-top:0.5rem;">
-            Full finetune @10k; 50 episodes/task × 3 eval seeds, Pi0.5-native cadence.
-            Drift wins every suite, and the gap <span class="w-drift">grows with task
-            difficulty</span> (Object +1.3 → Long +6.4). Decode: 85.6 vs 259.8&nbsp;ms/chunk.
+            Full finetune @100k; 50 episodes/task × 3 eval seeds, Pi0.5-native cadence.
+            Drift leads the four-suite average (97.4 vs 96.9) with its <span class="w-drift">edge
+            on the harder suites</span> (Goal +1.4, Long +1.4); the near-saturated Spatial/Object
+            tie. KeyStone (K=8, C=2) lifts the average to 97.6. Decode: 85.6 vs 259.8&nbsp;ms/chunk.
           </p>
           <p class="section-lead" style="margin-top:1.5rem;">
-            The edge also <span class="w-drift">grows as adaptation capacity shrinks</span> —
-            the less the backbone can adapt, the more the one-step objective matters:
+            In a separate matched-budget study (both arms @10k), the edge also
+            <span class="w-drift">grows as adaptation capacity shrinks</span> — the less the
+            backbone can adapt, the more the one-step objective matters:
           </p>
           <div class="figure-block wide">
             <img src="static/images/c1_capacity_arc.svg" alt="Line chart on Pi0.5: Drift versus FM success across three training regimes; the gap grows from +2.2 at full finetune to +11.2 with a frozen backbone at 3k steps.">
@@ -1677,7 +1681,7 @@
             pass off the shared prefix. KeyStone executes the consensus candidate.
           </p>
           <div class="best-result-banner" aria-label="Best observed result">
-            <div class="best-result-score"><span>96.5</span><small>4-suite avg</small></div>
+            <div class="best-result-score"><span>97.6</span><small>4-suite avg</small></div>
             <div class="best-result-copy">
               <strong><span class="w-key">Drift + KeyStone on Pi0.5:</span></strong>
               best average across all four LIBERO suites, with

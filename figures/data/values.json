@@ -1,5 +1,5 @@
 {
-  "_comment": "v2 (2026-07-13). Single source of truth for headline chart numbers; mirrors drift-vla-pub/NUMBERS.md (per-seed evidence in drift-vla-pub/docs/*). Cross-suite: n=3 eval seeds {1000,1001,1002}, 50 ep/task, each model at its native replan cadence (SmolVLA ns=1, Pi0.5 nas=10); FM at native 10-NFE, Drift at 1-NFE. Latency measured per action chunk, batch 1; expert/prefix split derived from FM@10 and FM@1 totals assuming one shared prefix (totals match measured values). suites values are [mean, std].",
+  "_comment": "v3 (2026-07-20). Single source of truth for headline chart numbers; mirrors drift-vla-pub/NUMBERS.md (per-seed evidence in drift-vla-pub/docs/*). Cross-suite: n=3 eval seeds {1000,1001,1002}, 50 ep/task, each model at its native replan cadence (SmolVLA ns=1, Pi0.5 nas=10); FM at native 10-NFE, Drift at 1-NFE. Latency measured per action chunk, batch 1; expert/prefix split derived from FM@10 and FM@1 totals assuming one shared prefix (totals match measured values). suites values are [mean, std]. [v3: Pi0.5 headline = released 100k matched-pair checkpoints; expert-only/capacity-arc remain the 10k backbone study.]",
   "backbones": {
     "smolvla": {
       "label": "SmolVLA (450M)",
@@ -108,24 +108,24 @@
         "expert_lat_ms": 193.1,
         "suites": {
           "spatial": [
-            96.2,
-            2.0
-          ],
-          "object": [
-            96.8,
-            0.4
-          ],
-          "goal": [
-            92.6,
+            98.5,
             0.3
           ],
+          "object": [
+            99.1,
+            0.6
+          ],
+          "goal": [
+            96.7,
+            0.5
+          ],
           "long": [
-            86.7,
-            1.4
+            93.3,
+            0.7
           ],
           "avg": [
-            93.1,
-            0.5
+            96.9,
+            0.1
           ]
         }
       },
@@ -142,24 +142,24 @@
         "expert_lat_ms": 18.9,
         "suites": {
           "spatial": [
-            98.3,
-            0.3
+            97.9,
+            1.0
           ],
           "object": [
-            98.1,
-            0.9
+            99.0,
+            0.2
           ],
           "goal": [
-            95.6,
-            0.8
+            98.1,
+            0.4
           ],
           "long": [
-            93.1,
-            0.6
+            94.7,
+            1.8
           ],
           "avg": [
-            96.3,
-            0.1
+            97.4,
+            0.4
           ]
         }
       },
@@ -174,8 +174,8 @@
         ]
       },
       "best_recipe": {
-        "label": "9k plain",
-        "avg": 96.6
+        "label": "75k",
+        "avg": 97.7
       },
       "speedup_vs_fm10": 3.0
     }
